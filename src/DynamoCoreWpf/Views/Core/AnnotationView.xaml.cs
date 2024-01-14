@@ -135,11 +135,6 @@ namespace Dynamo.Nodes
             if (GroupTextBlock.IsVisible && e.ClickCount >= 2)
             {
                 DynamoSelection.Instance.ClearSelection();
-                //Set the panning mode to false if a group is in editing mode.
-                if (ViewModel.WorkspaceViewModel.IsPanning)
-                {
-                    ViewModel.WorkspaceViewModel.DynamoViewModel.BackgroundPreviewViewModel.TogglePan(null);
-                }
                 e.Handled = true;
             }
 

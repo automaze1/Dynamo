@@ -18,7 +18,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using Dynamo.Wpf.ViewModels.Watch3D;
 using Function = Dynamo.Graph.Nodes.CustomNodes.Function;
 using Newtonsoft.Json.Linq;
 using System.IO;
@@ -215,13 +214,6 @@ namespace Dynamo.ViewModels
                 runPeriod);
             }
         }
-
-        /// <summary>
-        /// Gets the Camera Data. This is used when serializing Camera Data in the View block
-        /// of Graph.Json.
-        /// </summary>
-        [JsonProperty("Camera")]
-        public CameraData Camera => DynamoViewModel.BackgroundPreviewViewModel.GetCameraInformation() ?? new CameraData();
 
         /// <summary>
         /// ViewModel that is used in InCanvasSearch in context menu and called by Shift+DoubleClick.

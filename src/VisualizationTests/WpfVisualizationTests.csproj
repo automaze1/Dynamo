@@ -165,16 +165,6 @@
       <Name>CoreNodeModels</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Libraries\Watch3DNodeModelsWpf\Watch3DNodeModelsWpf.csproj">
-      <Project>{b9e338ca-6677-4772-b01d-1fceabcdaaab}</Project>
-      <Name>Watch3DNodeModelsWpf</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Libraries\Watch3DNodeModels\Watch3DNodeModels.csproj">
-      <Project>{31183026-DE70-49CB-BC7C-0DFD0A088F62}</Project>
-      <Name>Watch3DNodeModels</Name>
-      <Private>False</Private>
-    </ProjectReference>
     <ProjectReference Include="..\NodeServices\DynamoServices.csproj">
       <Project>{ef879a10-041d-4c68-83e7-3192685f1bae}</Project>
       <Name>DynamoServices</Name>

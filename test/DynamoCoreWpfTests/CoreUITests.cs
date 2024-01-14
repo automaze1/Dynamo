@@ -473,20 +473,6 @@ namespace DynamoCoreWpfTests
         [Category("DynamoUI")]
         public void PreferenceSetting()
         {
-            // Test Case to ensure that the link for these persistent variable
-            // between DynamoViewModel, Model is not broken or replaced.
-            #region BackgroundPreviewActive
-
-            var backgroundPreviewName = ViewModel.BackgroundPreviewViewModel.PreferenceWatchName;
-            bool expectedValue = !ViewModel.Model.PreferenceSettings.GetIsBackgroundPreviewActive(backgroundPreviewName);
-            ViewModel.ToggleFullscreenWatchShowing(null);
-            Assert.AreEqual(expectedValue, ViewModel.Model.PreferenceSettings.GetIsBackgroundPreviewActive(backgroundPreviewName));
-
-            expectedValue = !ViewModel.Model.PreferenceSettings.GetIsBackgroundPreviewActive(backgroundPreviewName);
-            ViewModel.ToggleFullscreenWatchShowing(null);
-            Assert.AreEqual(expectedValue, ViewModel.Model.PreferenceSettings.GetIsBackgroundPreviewActive(backgroundPreviewName));
-            #endregion
-
             #region ConsoleHeight
             int expectedHeight = 100;
             ViewModel.ToggleConsoleShowing(null);
@@ -544,13 +530,10 @@ namespace DynamoCoreWpfTests
 
             initalSetting.ConnectorType = ConnectorType.BEZIER;
             initalSetting.ConsoleHeight = 100;
-            initalSetting.SetIsBackgroundPreviewActive(backgroundPreviewName, true);
 
             initalSetting.Save(tempPath);
             resultSetting = PreferenceSettings.Load(tempPath);
 
-            Assert.AreEqual(resultSetting.GetIsBackgroundPreviewActive(backgroundPreviewName),
-                initalSetting.GetIsBackgroundPreviewActive(backgroundPreviewName));
             Assert.AreEqual(resultSetting.ConnectorType, initalSetting.ConnectorType);
             Assert.AreEqual(resultSetting.ConsoleHeight, initalSetting.ConsoleHeight);
             #endregion
@@ -558,13 +541,10 @@ namespace DynamoCoreWpfTests
             #region Second Test
             initalSetting.ConnectorType = ConnectorType.POLYLINE;
             initalSetting.ConsoleHeight = 0;
-            initalSetting.SetIsBackgroundPreviewActive(backgroundPreviewName, false);
 
             initalSetting.Save(tempPath);
             resultSetting = PreferenceSettings.Load(tempPath);
 
-            Assert.AreEqual(resultSetting.GetIsBackgroundPreviewActive(backgroundPreviewName),
-                initalSetting.GetIsBackgroundPreviewActive(backgroundPreviewName));
             Assert.AreEqual(resultSetting.ConnectorType, initalSetting.ConnectorType);
             Assert.AreEqual(resultSetting.ConsoleHeight, initalSetting.ConsoleHeight);
             #endregion
@@ -579,16 +559,6 @@ namespace DynamoCoreWpfTests
         {
             var settings = new PreferenceSettings();
             Assert.False(settings.ShowEdges);
-        }
-
-        [Test]
-        public void PreferenceSettings_ShowEdges_Toggle()
-        {
-            ViewModel.RenderPackageFactoryViewModel.ShowEdges = false;
-            Assert.False(Model.PreferenceSettings.ShowEdges);
-
-            ViewModel.RenderPackageFactoryViewModel.ShowEdges = true;
-            Assert.True(Model.PreferenceSettings.ShowEdges);
         }
 
         [Test]

@@ -1,32 +1,26 @@
-﻿using System;
+﻿using CoreNodeModels;
+using CoreNodeModels.Input;
+using Dynamo.Engine;
+using Dynamo.Events;
+using Dynamo.Graph;
+using Dynamo.Graph.Connectors;
+using Dynamo.Graph.Nodes;
+using Dynamo.Graph.Nodes.CustomNodes;
+using Dynamo.Graph.Nodes.ZeroTouch;
+using Dynamo.Graph.Workspaces;
+using Dynamo.Models;
+using Dynamo.Tests;
+using Dynamo.Utilities;
+using Dynamo.ViewModels;
+using Dynamo.Wpf.ViewModels.Core;
+using Newtonsoft.Json.Linq;
+using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
-
-using CoreNodeModels;
-using CoreNodeModels.Input;
-using Dynamo.Graph;
-using Dynamo.Graph.Nodes;
-using Dynamo.Graph.Nodes.CustomNodes;
-using Dynamo.Graph.Nodes.ZeroTouch;
-using Dynamo.Nodes;
-using Dynamo.Tests;
-
-using NUnit.Framework;
-
 using DoubleSlider = CoreNodeModels.Input.DoubleSlider;
-using Dynamo.Events;
-using Dynamo.Models;
-using Dynamo.Graph.Workspaces;
-using Dynamo.ViewModels;
-using Dynamo.Engine;
-using Dynamo.Wpf.ViewModels.Core;
-using Dynamo.Wpf.ViewModels.Watch3D;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Dynamo.Utilities;
-using Dynamo.Graph.Connectors;
 
 namespace DynamoCoreWpfTests
 {
@@ -416,7 +410,6 @@ namespace DynamoCoreWpfTests
 
             // We need to replace the camera with default camera so it will match the deafult camera produced by the 
             // save without a real view below.
-            jobject1["View"]["Camera"] = JToken.FromObject(new CameraData());
             jsonText1 = jobject1.ToString();
             jobject1 = JObject.Parse(jsonText1);
           
@@ -750,7 +743,6 @@ namespace DynamoCoreWpfTests
             Assert.IsTrue(Math.Abs(a.X - b.X) < .00001, "The workspaces don't have the same X offset.");
             Assert.IsTrue(Math.Abs(a.X - b.X) < .00001, "The workspaces don't have the same Y offset.");
             Assert.IsTrue(Math.Abs(a.Zoom - b.Zoom) < .00001, "The workspaces don't have the same Zoom.");
-            Assert.AreEqual(a.Camera, b.Camera);
             Assert.AreEqual(a.Guid, b.Guid);
 
             Assert.AreEqual(a.NodeViewCount, b.NodeViewCount, "The workspaces don't have the same number of node views.");
@@ -784,7 +776,6 @@ namespace DynamoCoreWpfTests
             Assert.IsTrue(Math.Abs(a.X - b.X) < .00001, "The workspaces don't have the same X offset.");
             Assert.IsTrue(Math.Abs(a.X - b.X) < .00001, "The workspaces don't have the same Y offset.");
             Assert.IsTrue(Math.Abs(a.Zoom - b.Zoom) < .00001, "The workspaces don't have the same Zoom.");
-            Assert.AreEqual(a.Camera, b.Camera);
             Assert.AreEqual(a.Guid, b.Guid);
 
             Assert.AreEqual(a.NodeViewCount, b.NodeViewCount, "The workspaces don't have the same number of node views.");
@@ -1045,7 +1036,6 @@ namespace DynamoCoreWpfTests
             public int ConnectorViewCount { get; set; }
             public Dictionary<Guid, NodeViewComparisonData> NodeViewDataMap { get; set; }
             public Dictionary<Guid, ExtraAnnotationViewInfo> AnnotationMap { get; set; }
-            public CameraData Camera { get; set; }
             public double X { get; set; }
             public double Y { get; set; }
             public double Zoom { get; set; }
@@ -1093,7 +1083,6 @@ namespace DynamoCoreWpfTests
                 X = workspaceView.X;
                 Y = workspaceView.Y;
                 Zoom = workspaceView.Zoom;
-                Camera = workspaceView.Camera;
             }
         }
     }

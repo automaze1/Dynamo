@@ -45,22 +45,6 @@ namespace DynamoCoreWpfTests
             base.GetLibrariesToPreload(libraries);
         }
 
-        [Test, Category("DisplayHardwareDependent")]
-        public void Watch3DHasViewer()
-        {
-            var renderingTier = (System.Windows.Media.RenderCapability.Tier >> 16);
-            if (renderingTier < 2)
-            {
-                Assert.Inconclusive("Hardware rendering is not available. Watch3D is not created.");
-            }
-
-            Open(@"UI\CoreUINodes.dyn");
-
-            var nodeView = NodeViewWithGuid("6869c998-b819-4686-8849-6f36162c4182"); // NodeViewOf<Watch3D>();
-            var watchView = nodeView.ChildrenOfType<Watch3DView>().FirstOrDefault();
-            Assert.NotNull(watchView);
-        }
-
         [Test]
         public void StringInputHasTextboxAndCorrectValue()
         {

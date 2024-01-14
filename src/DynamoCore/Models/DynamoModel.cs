@@ -34,7 +34,6 @@ using Dynamo.Selection;
 using Dynamo.Updates;
 using Dynamo.Utilities;
 using DynamoServices;
-using DynamoUnits;
 using Greg;
 using ProtoCore;
 using ProtoCore.Runtime;
@@ -1263,8 +1262,6 @@ namespace Dynamo.Models
 
         private static void InitializePreferences(IPreferences preferences)
         {
-            BaseUnit.NumberFormat = preferences.NumberFormat;
-
             var settings = preferences as PreferenceSettings;
             if (settings != null)
             {
@@ -1281,12 +1278,6 @@ namespace Dynamo.Models
         //TODO(Steve): See if we can't just do this in PreferenceSettings by making the properties directly access BaseUnit
         private void PreferenceSettings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            switch (e.PropertyName)
-            {
-                case "NumberFormat":
-                    BaseUnit.NumberFormat = PreferenceSettings.NumberFormat;
-                    break;
-            }
         }
 
         /// <summary>

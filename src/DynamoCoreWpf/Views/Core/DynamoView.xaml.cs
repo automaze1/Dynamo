@@ -10,7 +10,6 @@ using Dynamo.Nodes;
 using Dynamo.Nodes.Prompts;
 using Dynamo.PackageManager;
 using Dynamo.PackageManager.UI;
-using Dynamo.Search;
 using Dynamo.Search.SearchElements;
 using Dynamo.Selection;
 using Dynamo.Services;
@@ -22,7 +21,6 @@ using Dynamo.Wpf;
 using Dynamo.Wpf.Authentication;
 using Dynamo.Wpf.Controls;
 using Dynamo.Wpf.Extensions;
-using Dynamo.Wpf.Interfaces;
 using Dynamo.Wpf.Utilities;
 using Dynamo.Wpf.ViewModels.Core;
 using Dynamo.Wpf.Views.Gallery;
@@ -43,7 +41,6 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using HelixToolkit.Wpf.SharpDX;
 using ResourceNames = Dynamo.Wpf.Interfaces.ResourceNames;
 using String = System.String;
 
@@ -75,8 +72,6 @@ namespace Dynamo.Controls
         private bool isPSSCalledOnViewModelNoCancel = false;
 
         private readonly DispatcherTimer _workspaceResizeTimer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 0, 500), IsEnabled = false };
-
-        internal Watch3DView BackgroundPreview { get; private set; }
 
         public DynamoView(DynamoViewModel dynamoViewModel)
         {
@@ -475,34 +470,6 @@ namespace Dynamo.Controls
             Dispatcher.Invoke(new Action(UpdateLayout), DispatcherPriority.Render, null);
         }
 
-        private void DynamoViewModelRequestViewOperation(ViewOperationEventArgs e)
-        {
-            if (dynamoViewModel.BackgroundPreviewViewModel.CanNavigateBackground == false)
-                return;
-
-            switch (e.ViewOperation)
-            {
-                case ViewOperationEventArgs.Operation.FitView:
-                    if (dynamoViewModel.BackgroundPreviewViewModel != null)
-                    {
-                        dynamoViewModel.BackgroundPreviewViewModel.ZoomToFitCommand.Execute(null);
-                        return;
-                    }
-                    BackgroundPreview.View.ZoomExtents();
-                    break;
-
-                case ViewOperationEventArgs.Operation.ZoomIn:
-                    var camera1 = BackgroundPreview.View.CameraController;
-                    camera1.Zoom(-0.5 * BackgroundPreview.View.ZoomSensitivity);
-                    break;
-
-                case ViewOperationEventArgs.Operation.ZoomOut:
-                    var camera2 = BackgroundPreview.View.CameraController;
-                    camera2.Zoom(0.5 * BackgroundPreview.View.ZoomSensitivity);
-                    break;
-            }
-        }
-
         private void DynamoLoadedViewExtensionHandler(ViewLoadedParams loadedParams, IEnumerable<IViewExtension> extensions)
         {
             foreach (var ext in extensions)
@@ -531,7 +498,6 @@ namespace Dynamo.Controls
             WorkspaceTabs.SelectedIndex = 0;
             dynamoViewModel = (DataContext as DynamoViewModel);
             dynamoViewModel.Model.RequestLayoutUpdate += vm_RequestLayoutUpdate;
-            dynamoViewModel.RequestViewOperation += DynamoViewModelRequestViewOperation;
             dynamoViewModel.PostUiActivationCommand.Execute(null);
 
             _timer.Stop();
@@ -572,7 +538,6 @@ namespace Dynamo.Controls
 
             dynamoViewModel.RequestClose += DynamoViewModelRequestClose;
             dynamoViewModel.RequestSaveImage += DynamoViewModelRequestSaveImage;
-            dynamoViewModel.RequestSave3DImage += DynamoViewModelRequestSave3DImage;
             dynamoViewModel.SidebarClosed += DynamoViewModelSidebarClosed;
 
             dynamoViewModel.Model.RequestsCrashPrompt += Controller_RequestsCrashPrompt;
@@ -600,18 +565,6 @@ namespace Dynamo.Controls
 
             this.DynamoLoadedViewExtensionHandler(loadedParams, viewExtensionManager.ViewExtensions);
 
-            BackgroundPreview = new Watch3DView { Name = BackgroundPreviewName };
-            background_grid.Children.Add(BackgroundPreview);
-            BackgroundPreview.DataContext = dynamoViewModel.BackgroundPreviewViewModel;
-            BackgroundPreview.Margin = new System.Windows.Thickness(0, 20, 0, 0);
-            var vizBinding = new Binding
-            {
-                Source = dynamoViewModel.BackgroundPreviewViewModel,
-                Path = new PropertyPath("Active"),
-                Mode = BindingMode.TwoWay,
-                Converter = new BooleanToVisibilityConverter()
-            };
-            BackgroundPreview.SetBinding(VisibilityProperty, vizBinding);
             TrackStartupAnalytics();
 
             // In native host scenario (e.g. Revit), the "Application.Current" will be "null". Therefore, the InCanvasSearchControl.OnRequestShowInCanvasSearch
@@ -912,28 +865,6 @@ namespace Dynamo.Controls
             workspace.SaveWorkspaceAsImage(e.Path);
         }
 
-        private void DynamoViewModelRequestSave3DImage(object sender, ImageSaveEventArgs e)
-        {
-            var canvas = (DPFCanvas)BackgroundPreview.View.RenderHost;
-
-            var encoder = new PngBitmapEncoder();
-            var rtBitmap = new RenderTargetBitmap((int)canvas.ActualWidth, (int)canvas.ActualHeight, 96, 96,
-                PixelFormats.Pbgra32);
-            rtBitmap.Render(canvas);
-
-            encoder.Frames.Add(BitmapFrame.Create(rtBitmap));
-
-            if (File.Exists(e.Path))
-            {
-                File.Delete(e.Path);
-            }
-
-            using (var stream = File.Create(e.Path))
-            {
-                encoder.Save(stream);
-            }
-        }
-
         private void DynamoViewModelRequestClose(object sender, EventArgs e)
         {
             Close();
@@ -1168,7 +1099,6 @@ namespace Dynamo.Controls
             }
 
             dynamoViewModel.Model.RequestLayoutUpdate -= vm_RequestLayoutUpdate;
-            dynamoViewModel.RequestViewOperation -= DynamoViewModelRequestViewOperation;
 
             //PACKAGE MANAGER
             dynamoViewModel.RequestPackagePublishDialog -= DynamoViewModelRequestRequestPackageManagerPublish;
@@ -1226,30 +1156,6 @@ namespace Dynamo.Controls
         {
             if (e.Key != Key.Escape || !IsMouseOver) return;
 
-            var vm = dynamoViewModel.BackgroundPreviewViewModel;
-
-
-            // ESC key to navigate has long lag on some machines.
-            // This issue was caused by using KeyEventArgs.IsRepeated API
-            // In order to fix this we need to use our own extension method DelayInvoke to determine
-            // whether ESC key is being held down or not
-            if (!IsEscKeyPressed && !vm.NavigationKeyIsDown)
-            {
-                IsEscKeyPressed = true;
-                dynamoViewModel.UIDispatcher.DelayInvoke(navigationInterval, () =>
-                {
-                    if (IsEscKeyPressed)
-                    {
-                        vm.NavigationKeyIsDown = true;
-                    }
-                });
-            }
-
-            else
-            {
-                vm.CancelNavigationState();
-            }
-
             e.Handled = true;
         }
 
@@ -1258,12 +1164,6 @@ namespace Dynamo.Controls
             if (e.Key != Key.Escape) return;
 
             IsEscKeyPressed = false;
-            if (dynamoViewModel.BackgroundPreviewViewModel.CanNavigateBackground)
-            {
-                dynamoViewModel.BackgroundPreviewViewModel.NavigationKeyIsDown = false;
-                dynamoViewModel.EscapeCommand.Execute(null);
-                e.Handled = true;
-            }
         }
 
         private void WorkspaceTabs_SelectionChanged(object sender, SelectionChangedEventArgs e)

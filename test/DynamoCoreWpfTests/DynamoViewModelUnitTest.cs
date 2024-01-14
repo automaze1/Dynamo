@@ -11,7 +11,6 @@ using NUnit.Framework;
 
 using System.Reflection;
 using System.IO;
-using Dynamo.Wpf.ViewModels.Watch3D;
 using TestServices;
 
 namespace Dynamo.Tests
@@ -126,14 +125,6 @@ namespace Dynamo.Tests
                     StartInTestMode = true,
                     GeometryFactoryPath = preloader.GeometryFactoryPath,
                     ProcessMode = TaskProcessMode.Synchronous
-                });
-
-            var watch3DViewParams = new Watch3DViewModelStartupParams(model);
-            this.ViewModel = DynamoViewModel.Start(
-                new DynamoViewModel.StartConfiguration()
-                {
-                    DynamoModel = model,
-                    Watch3DViewModel = new DefaultWatch3DViewModel(null, watch3DViewParams)
                 });
 
             this.ViewModel.RequestUserSaveWorkflow += RequestUserSaveWorkflow;

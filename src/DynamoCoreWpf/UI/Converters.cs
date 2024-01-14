@@ -16,14 +16,12 @@ using Dynamo.Updates;
 using Dynamo.ViewModels;
 using Dynamo.Wpf.Properties;
 using Dynamo.Wpf.ViewModels;
-using DynamoUnits;
 using System.Windows.Controls.Primitives;
 using Dynamo.Configuration;
 using Dynamo.Graph.Nodes;
 using Dynamo.Graph.Workspaces;
 using Dynamo.Logging;
 using Dynamo.Utilities;
-using HelixToolkit.Wpf.SharpDX;
 using RestSharp.Extensions.MonoHttp;
 using Color = System.Windows.Media.Color;
 using FlowDirection = System.Windows.FlowDirection;
@@ -1531,14 +1529,7 @@ namespace Dynamo.Controls
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            //source -> target
-            //units are stored internally as culturally invariant, so we need to convert them back
-            double dbl;
-            if (double.TryParse(value as string, NumberStyles.Any, CultureInfo.InvariantCulture, out dbl))
-            {
-                return (dbl.ToString(SIUnit.NumberFormat, CultureInfo.InvariantCulture));
-            }
-            return value ?? 0.ToString(SIUnit.NumberFormat);
+            return value;
         }
 
         public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -1781,9 +1772,7 @@ namespace Dynamo.Controls
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var measure = (SIUnit)parameter;
-            measure.SetValueFromString(value.ToString());
-            return measure.Value;
+            return value;
         }
     }
 
@@ -1833,8 +1822,6 @@ namespace Dynamo.Controls
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (parameter.ToString() == SIUnit.NumberFormat)
-                return true;
             return false;
         }
 
@@ -2236,30 +2223,6 @@ namespace Dynamo.Controls
         {
             var text = value.ToString();           
             return text;
-        }
-    }
-
-    internal class Watch3DBackgroundColorConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            var homeColor = (System.Windows.Media.Color)SharedDictionaryManager.DynamoColorsAndBrushesDictionary["WorkspaceBackgroundHome"];
-            var customColor = (System.Windows.Media.Color)SharedDictionaryManager.DynamoColorsAndBrushesDictionary["WorkspaceBackgroundCustom"];
-
-            //parameter will contain a true or false
-            //whether this is the home space
-            if ((bool)value)
-            {
-                return homeColor.ToColor4();
-            }
-
-            return customColor.ToColor4();
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter,
-          CultureInfo culture)
-        {
-            return null;
         }
     }
 
