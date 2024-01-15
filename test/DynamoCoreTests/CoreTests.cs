@@ -20,6 +20,7 @@ using NUnit.Framework;
 using ProtoCore.DSASM;
 using DynCmd = Dynamo.Models.DynamoModel;
 using Dynamo.Configuration;
+using Dynamo.Graph.Notes;
 
 namespace Dynamo.Tests
 {
@@ -801,6 +802,31 @@ namespace Dynamo.Tests
         }
 
         [Test]
+        public void CanOpenDoubleInputFile()
+        {
+            string openPath = Path.Combine(TestDirectory,
+                @"core\number\TestNumberDeserialization.dyn");
+            OpenModel(openPath);
+
+            Assert.AreEqual(3, CurrentDynamoModel.CurrentWorkspace.Nodes.Count());
+
+            var node1 = CurrentDynamoModel.CurrentWorkspace.NodeFromWorkspace<DoubleInput>(
+                Guid.Parse("6fc905f8533f433a90fe4b9181463d53"));
+            Assert.IsNotNull(node1);
+            Assert.AreEqual(node1.Value, "1");
+
+            var node2 = CurrentDynamoModel.CurrentWorkspace.NodeFromWorkspace<DoubleInput>(
+                Guid.Parse("d40969e40f3449dfb7eb20317ff91752"));
+            Assert.IsNotNull(node2);
+            Assert.AreEqual(node2.Value, "1");
+
+            var node3 = CurrentDynamoModel.CurrentWorkspace.NodeFromWorkspace<DoubleInput>(
+                Guid.Parse("8d298e3f574a420b8c789829951da295"));
+            Assert.IsNotNull(node3);
+            Assert.AreEqual(node3.Value, "1.1");
+        }
+
+        [Test]
         [Category("UnitTests")]
         public void SelectionDoesNotChangeWhenAddingAlreadySelectedNode()
         {
@@ -951,6 +977,54 @@ namespace Dynamo.Tests
             {
                 Assert.IsTrue(node.UpstreamCache.SetEquals(node.AllUpstreamNodes(new List<NodeModel>())));
             }
+        }
+
+        [Test]
+        [Category("UnitTests")]
+        public void UpdatingAWorkspaceWithExtraViewInfo_DoesNotDupliateNotesAndGroups()
+        {
+            //add a node to the currentWorkspace
+            var addNode = new DSFunction(CurrentDynamoModel.LibraryServices.GetFunctionDescriptor("+"));
+            this.CurrentDynamoModel.CurrentWorkspace.AddAndRegisterNode(addNode);
+            //put the node in a group
+            DynamoSelection.Instance.Selection.Add(addNode);
+            //create the group around selected node
+            Guid groupid = Guid.NewGuid();
+            var annotation = this.CurrentDynamoModel.CurrentWorkspace.AddAnnotation("This is a test group", groupid);
+
+            Assert.AreEqual(this.CurrentDynamoModel.CurrentWorkspace.Annotations.Count(), 1);
+
+            //add a note the current workspace
+            var newNote = new NoteModel(100, 100, "someText", Guid.NewGuid());
+            this.CurrentDynamoModel.CurrentWorkspace.AddNote(newNote, false);
+
+            //now call update with some test data
+
+            var mockViewBlock = new ExtraWorkspaceViewInfo();
+            mockViewBlock.Annotations = new[] {
+                new ExtraAnnotationViewInfo()
+                { Id =groupid.ToString(),
+                    Title = annotation.AnnotationText,
+                    Nodes =annotation.Nodes.Select(x=>x.GUID.ToString()).ToList(),
+                    FontSize = annotation.FontSize,
+                    Background = annotation.Background,
+                    Left = annotation.X,
+                    Top = annotation.Y,
+                },
+
+                new ExtraAnnotationViewInfo()
+                { Id =newNote.GUID.ToString(),
+                    Title = newNote.Text,
+                    Nodes = new List<string>(),
+                    Left = annotation.X,
+                    Top = annotation.Y,
+                }
+            };
+
+
+            this.CurrentDynamoModel.CurrentWorkspace.UpdateWithExtraWorkspaceViewInfo(mockViewBlock);
+            Assert.AreEqual(1, this.CurrentDynamoModel.CurrentWorkspace.Annotations.Count());
+            Assert.AreEqual(1, this.CurrentDynamoModel.CurrentWorkspace.Notes.Count());
         }
     }
 }
