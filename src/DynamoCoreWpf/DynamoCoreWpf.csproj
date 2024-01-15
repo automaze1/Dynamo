@@ -50,8 +50,8 @@
     <Reference Include="FontAwesome.WPF">
       <HintPath>..\..\extern\FontAwesome\FontAwesome.WPF.dll</HintPath>
     </Reference>
-    <Reference Include="Greg, Version=1.0.6874.25994, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Greg.1.0.6874.25994\lib\net45\Greg.dll</HintPath>
+    <Reference Include="Greg, Version=1.1.7074.39318, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Greg.1.1.7074.39323\lib\net45\Greg.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.AvalonEdit, Version=4.3.1.9429, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
