@@ -37,8 +37,6 @@
     <Reference Include="CefSharp.Wpf">
       <HintPath>..\packages\CefSharp.Wpf.57.0.0\CefSharp\x64\CefSharp.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="Greg, Version=1.0.6874.25994, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Greg.1.0.6874.25994\lib\net45\Greg.dll</HintPath>
     <Reference Include="Greg, Version=1.1.7074.39318, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Greg.1.1.7074.39323\lib\net45\Greg.dll</HintPath>
     </Reference>
