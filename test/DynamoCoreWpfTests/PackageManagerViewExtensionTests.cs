@@ -86,7 +86,6 @@ namespace DynamoCoreWpfTests
             {
                 PathResolver = pathResolver,
                 StartInTestMode = true,
-                GeometryFactoryPath = preloader.GeometryFactoryPath,
                 ProcessMode = TaskProcessMode.Synchronous,
                 Preferences = new PreferenceSettings()
                 {

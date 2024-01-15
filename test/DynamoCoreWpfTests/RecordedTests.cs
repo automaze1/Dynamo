@@ -14,7 +14,6 @@ using Dynamo.Scheduler;
 using Dynamo.Tests;
 using Dynamo.Utilities;
 using Dynamo.ViewModels;
-using DynamoShapeManager;
 using NUnit.Framework;
 using System.Reflection;
 using CoreNodeModels.Input;
@@ -90,7 +89,6 @@ namespace DynamoCoreWpfTests
                 this.ViewModel = null;
             }
 
-            preloader = null; // Invalid preloader object for the test.
         }
 
         #endregion
@@ -167,17 +165,7 @@ namespace DynamoCoreWpfTests
             }
 
             var geometryFactoryPath = string.Empty;
-            //preloadGeometry = true;
-            if (preloadGeometry && (preloader == null))
-            {
-                var assemblyPath = Assembly.GetExecutingAssembly().Location;
-                preloader = new Preloader(Path.GetDirectoryName(assemblyPath));
-                preloader.Preload();
-
-                geometryFactoryPath = preloader.GeometryFactoryPath;
-                preloadGeometry = false;
-            }
-
+            
             TestPathResolver pathResolver = null;
             var preloadedLibraries = new List<string>();
             GetLibrariesToPreload(preloadedLibraries);
@@ -1237,7 +1225,6 @@ namespace DynamoCoreWpfTests
     {
         protected override void GetLibrariesToPreload(List<string> libraries)
         {
-            libraries.Add("ProtoGeometry.dll");
             libraries.Add("DSIronPython.dll");
             libraries.Add("FunctionObject.ds");
             base.GetLibrariesToPreload(libraries);

@@ -2,7 +2,6 @@
 using Dynamo.Applications;
 using Dynamo.Models;
 using Dynamo.ViewModels;
-using Dynamo.Wpf.ViewModels.Watch3D;
 
 namespace DynamoWPFCLI
 {
@@ -20,12 +19,7 @@ namespace DynamoWPFCLI
                 var viewModel = DynamoViewModel.Start(
                     new DynamoViewModel.StartConfiguration()
                     {
-                        DynamoModel = model,
-                        Watch3DViewModel = new DefaultWatch3DViewModel(null, new Watch3DViewModelStartupParams(model))
-                        {
-                            Active = false,
-                            CanBeActivated = false
-                        }
+                        DynamoModel = model
                     });
 
                 var runner = new CommandLineRunnerWPF(viewModel);

@@ -16,7 +16,6 @@ using Dynamo.Scheduler;
 using Dynamo.Tests;
 using Dynamo.Updates;
 using Dynamo.ViewModels;
-using DynamoShapeManager;
 
 using NUnit.Framework;
 
@@ -34,7 +33,6 @@ namespace SystemTestServices
     {
         protected IPathResolver pathResolver;
         protected string workingDirectory;
-        private Preloader preloader;
         private AssemblyResolver assemblyResolver;
 
         #region protected properties
@@ -114,7 +112,6 @@ namespace SystemTestServices
 
             View = null;
             Model = null;
-            preloader = null;
             pathResolver = null;
 
             if (assemblyResolver != null)
@@ -162,8 +159,6 @@ namespace SystemTestServices
 
         protected virtual void StartDynamo(TestSessionConfiguration testConfig)
         {
-            preloader = new Preloader(testConfig.DynamoCorePath, new[] { testConfig.RequestedLibraryVersion2 });
-            preloader.Preload();
 
             var preloadedLibraries = new List<string>();
             GetLibrariesToPreload(preloadedLibraries);
@@ -185,7 +180,6 @@ namespace SystemTestServices
                 {
                     StartInTestMode = true,
                     PathResolver = pathResolver,
-                    GeometryFactoryPath = preloader.GeometryFactoryPath,
                     UpdateManager = this.UpdateManager,
                     ProcessMode = TaskProcessMode.Synchronous
                 });

@@ -32,7 +32,7 @@ namespace ViewExtensionLibraryTests
             {
                 PathResolver = pathResolver,
                 StartInTestMode = true,
-                GeometryFactoryPath = preloader.GeometryFactoryPath,
+                GeometryFactoryPath = string.Empty,
                 ProcessMode = TaskProcessMode.Synchronous,
                 Preferences = new PreferenceSettings() { CustomPackageFolders = new List<string>() { this.PackagesDirectory } }
             };

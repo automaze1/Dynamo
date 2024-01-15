@@ -12,7 +12,6 @@ using Dynamo.Scheduler;
 using Dynamo.ViewModels;
 using Dynamo.Nodes;
 using DynamoCoreWpfTests.Utility;
-using DynamoShapeManager;
 using NUnit.Framework;
 using TestServices;
 using Dynamo.Interfaces;
@@ -21,8 +20,6 @@ namespace DynamoCoreWpfTests
 {
     public class DynamoTestUIBase
     {
-        protected Preloader preloader;
-
         protected DynamoViewModel ViewModel { get; set; }
         protected DynamoView View { get; set; }
         protected DynamoModel Model { get; set; }
@@ -38,8 +35,6 @@ namespace DynamoCoreWpfTests
         public virtual void Start()
         {
             var assemblyPath = Assembly.GetExecutingAssembly().Location;
-            preloader = new Preloader(Path.GetDirectoryName(assemblyPath));
-            preloader.Preload();
             CreateTemporaryFolder();
 
             // Setup Temp PreferenceSetting Location for testing
@@ -88,7 +83,6 @@ namespace DynamoCoreWpfTests
             {
                 PathResolver = pathResolver,
                 StartInTestMode = true,
-                GeometryFactoryPath = preloader.GeometryFactoryPath,
                 ProcessMode = TaskProcessMode.Synchronous
             };
         }
@@ -114,7 +108,6 @@ namespace DynamoCoreWpfTests
 
             View = null;
             Model = null;
-            preloader = null;
 
             try
             {

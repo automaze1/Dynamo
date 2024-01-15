@@ -6,7 +6,6 @@ using Dynamo.Models;
 using Dynamo.Scheduler;
 using Dynamo.Selection;
 using Dynamo.ViewModels;
-using DynamoShapeManager;
 using NUnit.Framework;
 
 using System.Reflection;
@@ -30,7 +29,6 @@ namespace Dynamo.Tests
     public class DynamoViewModelUnitTest : DSEvaluationUnitTestBase
     {
         protected DynamoViewModel ViewModel;
-        protected Preloader preloader;
 
         protected override DynamoModel GetModel()
         {
@@ -48,7 +46,6 @@ namespace Dynamo.Tests
         {
             try
             {
-                preloader = null;
                 DynamoSelection.Instance.ClearSelection();
 
                 if (ViewModel == null)
@@ -91,9 +88,7 @@ namespace Dynamo.Tests
         protected void StartDynamo()
         {
             var assemblyPath = Assembly.GetExecutingAssembly().Location;
-            preloader = new Preloader(Path.GetDirectoryName(assemblyPath));
-            preloader.Preload();
-
+            
             TestPathResolver pathResolver = null;
             var preloadedLibraries = new List<string>();
             GetLibrariesToPreload(preloadedLibraries);
@@ -123,7 +118,6 @@ namespace Dynamo.Tests
                 {
                     PathResolver = pathResolver,
                     StartInTestMode = true,
-                    GeometryFactoryPath = preloader.GeometryFactoryPath,
                     ProcessMode = TaskProcessMode.Synchronous
                 });
 

@@ -12,7 +12,6 @@ using Dynamo.Models;
 using Dynamo.Scheduler;
 using Dynamo.Updates;
 using DynamoApplications.Properties;
-using DynamoShapeManager;
 using Microsoft.Win32;
 using NDesk.Options;
 
@@ -136,26 +135,6 @@ namespace Dynamo.Applications
             public string GeometryFilePath { get; set; }
         }
 
-        public static void PreloadShapeManager(ref string geometryFactoryPath, ref string preloaderLocation)
-        {
-            var exePath = Assembly.GetExecutingAssembly().Location;
-            var rootFolder = Path.GetDirectoryName(exePath);
-
-            var versions = new[]
-            {
-                    new Version(224,4,0),
-                    new Version(224,0,1),
-                    new Version(223,0,1),
-                    new Version(222,0,0),
-                    new Version(221,0,0)
-            };
-
-            var preloader = new Preloader(rootFolder, versions);
-            preloader.Preload();
-            geometryFactoryPath = preloader.GeometryFactoryPath;
-            preloaderLocation = preloader.PreloaderLocation;
-        }
-
         /// <summary>
         ///if we are building a model for CLI mode, then we don't want to start an updateManager
         ///for now, building an updatemanager instance requires finding Dynamo install location
@@ -173,8 +152,7 @@ namespace Dynamo.Applications
         {
             var geometryFactoryPath = string.Empty;
             var preloaderLocation = string.Empty;
-            PreloadShapeManager(ref geometryFactoryPath, ref preloaderLocation);
-
+            
             var config = new DynamoModel.DefaultStartConfiguration()
                   {
                       GeometryFactoryPath = geometryFactoryPath,

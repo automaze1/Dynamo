@@ -5,8 +5,6 @@ using System.Reflection;
 using Autodesk.DesignScript.Geometry;
 using Autodesk.DesignScript.Interfaces;
 
-using DynamoShapeManager;
-
 using NUnit.Framework;
 
 namespace TestServices
@@ -64,7 +62,6 @@ namespace TestServices
     class TestExecutionSession : IExecutionSession, IConfiguration, IDisposable
     {
         private Dictionary<string, object> configValues;
-        private Preloader preloader;
         private TestSessionConfiguration testConfig;
 
         public TestExecutionSession(TestSessionConfiguration testConfig)
@@ -108,16 +105,6 @@ namespace TestServices
 
         public object GetConfigValue(string config)
         {
-            if (string.Compare(ConfigurationKeys.GeometryFactory, config) == 0)
-            {
-                if (preloader != null) return preloader.GeometryFactoryPath;
-
-                preloader = new Preloader(testConfig.DynamoCorePath, new[] { testConfig.RequestedLibraryVersion2 });
-                preloader.Preload();
-
-                return preloader.GeometryFactoryPath;
-            }
-
             if (configValues.ContainsKey(config))
                 return configValues[config];
 

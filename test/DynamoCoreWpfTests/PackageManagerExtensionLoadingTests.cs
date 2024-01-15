@@ -22,7 +22,6 @@ namespace DynamoCoreWpfTests
 
         protected override void GetLibrariesToPreload(List<string> libraries)
         {
-            libraries.Add("ProtoGeometry.dll");
             libraries.Add("DesignScriptBuiltin.dll");
             libraries.Add("DSCoreNodes.dll");
             base.GetLibrariesToPreload(libraries);
@@ -34,7 +33,6 @@ namespace DynamoCoreWpfTests
             {
                 PathResolver = pathResolver,
                 StartInTestMode = true,
-                GeometryFactoryPath = preloader.GeometryFactoryPath,
                 ProcessMode = TaskProcessMode.Synchronous,
                 Preferences = new PreferenceSettings() { CustomPackageFolders = new List<string>() { this.PackagesDirectory } }
             };

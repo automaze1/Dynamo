@@ -2,7 +2,6 @@
 using System.Reflection;
 using Dynamo.Models;
 using Dynamo.Scheduler;
-using DynamoShapeManager;
 
 using NUnit.Framework;
 using System;
@@ -910,7 +909,6 @@ namespace Dynamo.Tests
     public class SchedulerIntegrationTests : UnitTestBase
     {
         private DynamoModel dynamoModel;
-        private Preloader preloader;
         private SampleSchedulerThread schedulerThread;
         private List<string> results;
 
@@ -1164,15 +1162,12 @@ namespace Dynamo.Tests
                 dynamoModel = null;
             }
 
-            preloader = null;
             base.Cleanup();
         }
 
         protected void StartDynamo()
         {
             var assemblyPath = Assembly.GetExecutingAssembly().Location;
-            preloader = new Preloader(Path.GetDirectoryName(assemblyPath));
-            preloader.Preload();
 
             var pathResolver = new TestPathResolver();
             pathResolver.AddPreloadLibraryPath("DSCoreNodes.dll");
@@ -1185,7 +1180,6 @@ namespace Dynamo.Tests
                     StartInTestMode = false,
                     SchedulerThread = schedulerThread,
                     PathResolver = pathResolver,
-                    GeometryFactoryPath = preloader.GeometryFactoryPath,
                     ProcessMode = TaskProcessMode.Asynchronous
                 });
         }

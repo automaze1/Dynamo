@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using Dynamo.Graph;
-using Dynamo.Graph.Workspaces;
+﻿using Dynamo.Graph.Workspaces;
 using Dynamo.Interfaces;
 using Dynamo.Models;
 using Dynamo.Scheduler;
 using Dynamo.Selection;
 using Dynamo.Tests;
 using Dynamo.Utilities;
-using DynamoShapeManager;
-
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using TestServices;
 
 namespace Dynamo
@@ -22,7 +19,6 @@ namespace Dynamo
     {
         protected DynamoModel CurrentDynamoModel { get; set; }
 
-        protected Preloader preloader;
         protected TestPathResolver pathResolver;
         protected IPreferences dynamoSettings;
 
@@ -42,7 +38,6 @@ namespace Dynamo
         {
             try
             {
-                preloader = null;
                 DynamoSelection.Instance.ClearSelection();
 
                 if (CurrentDynamoModel != null)
@@ -62,9 +57,6 @@ namespace Dynamo
         protected virtual void StartDynamo(IPreferences settings = null)
         {
             var assemblyPath = Assembly.GetExecutingAssembly().Location;
-            preloader = new Preloader(Path.GetDirectoryName(assemblyPath));
-
-            preloader.Preload();
 
             var preloadedLibraries = new List<string>();
             GetLibrariesToPreload(preloadedLibraries);
@@ -104,7 +96,6 @@ namespace Dynamo
             {
                 PathResolver = pathResolver,
                 StartInTestMode = true,
-                GeometryFactoryPath = preloader.GeometryFactoryPath,
                 Preferences = settings,
                 ProcessMode = TaskProcessMode.Synchronous
             };

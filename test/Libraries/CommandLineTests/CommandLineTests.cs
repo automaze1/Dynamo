@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using NUnit.Framework;
-using DynamoSandbox;
-using System.Text.RegularExpressions;
-using System.Xml;
-using Dynamo;
-using Dynamo.Applications;
+﻿using Dynamo.Applications;
 using Dynamo.ViewModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Dynamo.Wpf.ViewModels.Watch3D;
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace Dynamo.Tests
 {
@@ -128,13 +125,7 @@ namespace Dynamo.Tests
             var viewModel = DynamoViewModel.Start(
                 new DynamoViewModel.StartConfiguration()
                 {
-                    DynamoModel = this.CurrentDynamoModel,
-                    Watch3DViewModel =
-                        new DefaultWatch3DViewModel(null, new Watch3DViewModelStartupParams(this.CurrentDynamoModel))
-                        {
-                            Active = false,
-                            CanBeActivated = false
-                        }
+                    DynamoModel = this.CurrentDynamoModel
                 });
 
             var runner = new DynamoWPFCLI.CommandLineRunnerWPF(viewModel);
