@@ -28,18 +28,13 @@ namespace Dynamo.Applications
             preloadedLibraryPaths = new List<string>
             {
                 "VMDataBridge.dll",
-                "ProtoGeometry.dll",
                 "DesignScriptBuiltin.dll",
                 "DSCoreNodes.dll",
                 "DSOffice.dll",
                 "DSIronPython.dll",
                 "FunctionObject.ds",
                 "BuiltIn.ds",
-                "DynamoConversions.dll",
-                "DynamoUnits.dll",
-                "Tessellation.dll",
-                "Analysis.dll",
-                "GeometryColor.dll"
+                "DynamoConversions.dll"
             };
 
         }
@@ -93,14 +88,12 @@ namespace Dynamo.Applications
             preloadedLibraryPaths = new List<string>
             {
                 "VMDataBridge.dll",
-                "ProtoGeometry.dll",
                 "DesignScriptBuiltin.dll",
                 "DSCoreNodes.dll",
                 "DSIronPython.dll",
                 "FunctionObject.ds",
                 "BuiltIn.ds",
-                "DynamoConversions.dll",
-                "DynamoUnits.dll",
+                "DynamoConversions.dll"
             };
 
         }
