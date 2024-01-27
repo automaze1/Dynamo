@@ -10,7 +10,6 @@ using Dynamo.Selection;
 using Dynamo.Utilities;
 using Dynamo.ViewModels;
 using Dynamo.Visualization;
-using Dynamo.Wpf.ViewModels.Watch3D;
 
 namespace Dynamo.Wpf.Extensions
 {
@@ -37,15 +36,6 @@ namespace Dynamo.Wpf.Extensions
         /// A reference to the background preview viewmodel for geometry selection,
         /// hit testing, mouse and keyboard event handling for events in the background preview 
         /// </summary>
-        public IWatch3DViewModel BackgroundPreviewViewModel { get { return dynamoViewModel.BackgroundPreviewViewModel; } }
-
-        /// <summary>
-        /// A reference to the factory for creating render packages in the extension
-        /// </summary>
-        public IRenderPackageFactory RenderPackageFactory
-        {
-            get { return dynamoViewModel.RenderPackageFactoryViewModel.Factory; }
-        }
 
         /// <summary>
         /// A reference to package install operations on the package manager

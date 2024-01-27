@@ -134,9 +134,6 @@
   </ItemGroup>
 
   <ItemGroup>
-      <PackageReference Include="HelixToolkit" Version="2.24.0" />
-      <PackageReference Include="HelixToolkit.Core.Wpf" Version="2.24.0" />
-      <PackageReference Include="HelixToolkit.SharpDX.Core.Wpf" Version="2.24.0" />
       <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
       <PackageReference Include="DynamoVisualProgramming.LibG_230_0_0" Version="3.0.0.3421" />
     <PackageReference Include="FontAwesome5" Version="2.1.11" />
@@ -146,17 +143,6 @@
 	<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 	<PackageReference Include="RestSharp" Version="108.0.1" />
 	<PackageReference Include="Cyotek.Drawing.BitmapFont" Version="2.0.0" />
-	<PackageReference Include="SharpDX" Version="4.2.0" />
-	<PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0">
-	  <IncludeAssets>none</IncludeAssets>
-	</PackageReference>
-	<PackageReference Include="SharpDX.Direct2D1" Version="4.2.0">
-	  <IncludeAssets>none</IncludeAssets>
-	</PackageReference>
-	<PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
-	<PackageReference Include="SharpDX.Direct3D9" Version="4.2.0" />
-	<PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
-	<PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
 	<PackageReference Include="System.Reflection.MetadataLoadContext" Version="6.0.0" />
     <Reference Include="Dynamo.Microsoft.Xaml.Behaviors">
       <HintPath>..\..\extern\Microsoft.Xaml.Behaviors\net6.0-windows\Dynamo.Microsoft.Xaml.Behaviors.dll</HintPath>
@@ -245,13 +231,11 @@
     <Compile Include="Utilities\CerDLL.cs" />
     <Compile Include="Utilities\CompactBubbleHandler.cs" />
     <Compile Include="Interfaces\IShellCom.cs" />
-    <Compile Include="Rendering\HelixRenderPackage.cs" />
     <Compile Include="Interfaces\IBrandingResourceProvider.cs" />
     <Compile Include="NodeViewCustomization\AssemblyNodeViewCustomizations.cs" />
     <Compile Include="NodeViewCustomization\CoreNodeViewCustomizations.cs" />
     <Compile Include="NodeViewCustomization\NodeViewCustomizationLoader.cs" />
     <Compile Include="NodeViewCustomization\NodeViewCustomizations.cs" />
-    <Compile Include="Rendering\RenderPackageExtensions.cs" />
     <Compile Include="Services\IconServices.cs" />
     <Compile Include="UI\ClassObjectTemplateSelector.cs" />
     <Compile Include="UI\DraggedAdorner.cs" />
@@ -386,16 +370,7 @@
     <Compile Include="ViewModels\Search\ClassInformationViewModel.cs" />
     <Compile Include="NodeViewCustomization\NodeViewCustomizations\SymbolViewCustomization.cs" />
     <Compile Include="NodeViewCustomization\NodeViewCustomizations\VariableInputNodeViewCustomization.cs" />
-    <Compile Include="ViewModels\RenderPackageFactoryViewModel.cs" />
     <Compile Include="ViewModels\Search\SearchCategory.cs" />
-    <Compile Include="ViewModels\Watch3D\DynamoGeometryModel3D.cs" />
-    <Compile Include="ViewModels\Watch3D\DynamoLineGeometryModel3D.cs" />
-    <Compile Include="ViewModels\Watch3D\DynamoPointGeometryModel3D.cs" />
-    <Compile Include="ViewModels\Watch3D\DynamoPointLineRenderCore.cs" />
-    <Compile Include="ViewModels\Watch3D\DynamoRenderCoreDataStore.cs" />
-    <Compile Include="ViewModels\Watch3D\HelixWatch3DViewModel.cs" />
-    <Compile Include="ViewModels\Watch3D\DefaultWatch3DViewModel.cs" />
-    <Compile Include="ViewModels\Watch3D\IWatch3DViewModel.cs" />
     <Compile Include="ViewModels\Core\ConnectorPinViewModel.cs" />
     <Compile Include="Views\About\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
@@ -463,17 +438,11 @@
     <Compile Include="Views\PackageManager\TermsOfUseView.xaml.cs">
       <DependentUpon>TermsOfUseView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModels\Watch3D\AttachedProperties.cs" />
-    <Compile Include="ViewModels\Watch3D\DynamoEffectsManager.cs" />
     <Compile Include="Views\Menu\PreferencesView.xaml.cs">
       <DependentUpon>PreferencesView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Preview\CameraExtensions.cs" />
     <Compile Include="Views\Preview\PreviewCompactView.xaml.cs">
       <DependentUpon>PreviewCompactView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Preview\Watch3DSettingsControl.xaml.cs">
-      <DependentUpon>Watch3DSettingsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
@@ -514,9 +483,6 @@
     <Compile Include="Controls\TooltipWindow.xaml.cs">
       <DependentUpon>TooltipWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Preview\Watch3DView.xaml.cs">
-      <DependentUpon>Watch3DView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\Preview\WatchTree.xaml.cs">
       <DependentUpon>WatchTree.xaml</DependentUpon>
     </Compile>
@@ -549,7 +515,6 @@
     <Compile Include="ViewModels\PackageManager\PublishPackageViewModel.cs" />
     <Compile Include="ViewModels\Search\SearchViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
-    <Compile Include="ViewModels\Preview\Watch3DFullscreenViewModel.cs" />
     <Compile Include="ViewModels\Preview\WatchViewModel.cs" />
     <Compile Include="ViewModels\Core\WorkspaceViewModel.cs" />
     <Compile Include="Windows\ExtensionWindow.xaml.cs">
@@ -807,7 +772,6 @@
     </None>
     <EmbeddedResource Include="UI\GuidedTour\DynamoOnboardingGuide_HouseCreationDS.dyn">
 	</EmbeddedResource>
-    <None Include="ViewModels\Watch3D\shaderSource\CompileShaders.bat" />
     <Resource Include="UI\Images\AboutWindow\logo_about_dark.png">
       <CopyToOutputDirectory></CopyToOutputDirectory>
     </Resource>
@@ -1465,10 +1429,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Preview\Watch3DSettingsControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Windows\BrowserWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -1521,10 +1481,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\TooltipWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\Preview\Watch3DView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -1595,11 +1551,6 @@
     <ProjectReference Include="..\Libraries\VMDataBridge\VMDataBridge.csproj">
       <Project>{ccb6e56b-2da1-4eba-a1f9-e8510e129d12}</Project>
       <Name>VMDataBridge</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Libraries\Watch3DNodeModels\Watch3DNodeModels.csproj">
-      <Project>{31183026-DE70-49CB-BC7C-0DFD0A088F62}</Project>
-      <Name>Watch3DNodeModels</Name>
-      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\NodeServices\DynamoServices.csproj">
       <Project>{ef879a10-041d-4c68-83e7-3192685f1bae}</Project>
@@ -1727,12 +1678,6 @@
     <Resource Include="UI\Images\link-16px.png" />
     <EmbeddedResource Include="Controls\Docs\NodeAutocompleteDocumentation.html" />
     <EmbeddedResource Include="Controls\Docs\FileTrustWarningDocumentation.html" />
-    <Content Include="sharpdx_direct3d11_effects_x64.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="sharpdx_direct3d11_effects_x86.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Resource Include="UI\Images\add_icon.png" />
     <Resource Include="UI\Images\pin.png" />
     <EmbeddedResource Include="ViewModels\PackageManager\Docs\PublishPackageDocumentation.html" />
@@ -1740,14 +1685,6 @@
     <Resource Include="UI\Images\undock_normal.png" />
     <Resource Include="UI\Images\TitleBarButtons\dock-darktheme-default.png" />
     <Resource Include="UI\Images\TitleBarButtons\dock-darktheme-hover.png" />
-    <None Include="ViewModels\Watch3D\shaderSource\helix_shader_defs\COMMON\Common.hlsl" />
-    <None Include="ViewModels\Watch3D\shaderSource\helix_shader_defs\COMMON\CommonBuffers.hlsl" />
-    <None Include="ViewModels\Watch3D\shaderSource\helix_shader_defs\COMMON\DataStructs.hlsl" />
-    <None Include="ViewModels\Watch3D\shaderSource\psDynamoLine.hlsl" />
-    <None Include="ViewModels\Watch3D\shaderSource\psDynamoMesh.hlsl" />
-    <None Include="ViewModels\Watch3D\shaderSource\psDynamoPoint.hlsl" />
-    <None Include="ViewModels\Watch3D\shaderSource\vsDynamoMesh.hlsl" />
-    <None Include="ViewModels\Watch3D\shaderSource\vsDynamoPointLine.hlsl" />
     <Resource Include="UI\Images\bubble-arrow.png" />
     <Resource Include="UI\Images\icon-dictionary-small.png" />
     <Resource Include="UI\Images\no-recommendations.png" />

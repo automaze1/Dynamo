@@ -7,7 +7,6 @@ using Dynamo.Models;
 using Dynamo.Scheduler;
 using Dynamo.Selection;
 using Dynamo.ViewModels;
-using Dynamo.Wpf.ViewModels.Watch3D;
 using DynamoShapeManager;
 using NUnit.Framework;
 using TestServices;
@@ -126,12 +125,10 @@ namespace Dynamo.Tests
                     ProcessMode = TaskProcessMode.Synchronous
                 });
 
-            var watch3DViewParams = new Watch3DViewModelStartupParams(model);
             this.ViewModel = DynamoViewModel.Start(
                 new DynamoViewModel.StartConfiguration()
                 {
                     DynamoModel = model,
-                    Watch3DViewModel = new DefaultWatch3DViewModel(null, watch3DViewParams)
                 });
 
             Assert.AreEqual(ViewModel.Model.State, DynamoModel.DynamoModelState.StartedUIless);

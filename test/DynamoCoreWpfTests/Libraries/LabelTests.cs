@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Dynamo.Graph.Nodes;
-using Dynamo.Wpf.ViewModels.Watch3D;
 using HelixToolkit.SharpDX.Core;
 using HelixToolkit.Wpf.SharpDX;
 using NUnit.Framework;
@@ -26,11 +25,6 @@ namespace AnalysisTests
             }
 
             ViewModel.OpenCommand.Execute(relativePath);
-        }
-
-        protected IEnumerable<Element3D> BackgroundPreviewGeometry
-        {
-            get { return ((HelixWatch3DViewModel)ViewModel.BackgroundPreviewViewModel).SceneItems; }
         }
 
         protected override void GetLibrariesToPreload(List<string> libraries)
@@ -75,19 +69,9 @@ namespace AnalysisTests
             //It won't have any warnings then it will be false
             bool hasWarnings = ViewModel.HomeSpace.Nodes.Any(n => n.State == ElementState.Warning || n.State == ElementState.PersistentWarning);
 
-            //This will get the text elements in the Background Preview
-            var textElements = BackgroundPreviewGeometry
-                               .Where(g => g is BillboardTextModel3D)
-                               .Cast<BillboardTextModel3D>()
-                               .Select(bb => bb.Geometry).Cast<BillboardText3D>()
-                               .ToArray();
-
             //Assert
             //Be Sure that we have no warning
             Assert.IsFalse(hasWarnings);
-
-            //Check that the Label contains the right text
-            Assert.That(textElements.First().TextInfo.First().Text, Is.EqualTo("test"));
         }
 
 

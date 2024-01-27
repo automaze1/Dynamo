@@ -43,7 +43,6 @@ using Dynamo.Wpf.Views;
 using Dynamo.Wpf.Views.Debug;
 using Dynamo.Wpf.Views.FileTrust;
 using Dynamo.Wpf.Windows;
-using HelixToolkit.Wpf.SharpDX;
 using ICSharpCode.AvalonEdit;
 using PythonNodeModels;
 using Brush = System.Windows.Media.Brush;
@@ -99,8 +98,6 @@ namespace Dynamo.Controls
         /// </summary>
         internal Dictionary<string, ExtensionWindow> ExtensionWindows { get; set; } = new Dictionary<string, ExtensionWindow>();
         internal ViewExtensionManager viewExtensionManager;
-        internal Watch3DView BackgroundPreview { get; private set; }
-
         private FileTrustWarning fileTrustWarningPopup = null;
 
         internal ShortcutToolbar ShortcutBar { get { return shortcutBar; } }
@@ -1211,32 +1208,6 @@ namespace Dynamo.Controls
             Dispatcher.Invoke(new Action(UpdateLayout), DispatcherPriority.Render, null);
         }
 
-        private void DynamoViewModelRequestViewOperation(ViewOperationEventArgs e)
-        {
-            if (dynamoViewModel.BackgroundPreviewViewModel.CanNavigateBackground == false)
-                return;
-
-            switch (e.ViewOperation)
-            {
-                case ViewOperationEventArgs.Operation.FitView:
-                    if (dynamoViewModel.BackgroundPreviewViewModel != null)
-                    {
-                        dynamoViewModel.BackgroundPreviewViewModel.ZoomToFitCommand.Execute(null);
-                        return;
-                    }
-                    BackgroundPreview.View.ZoomExtents();
-                    break;
-
-                case ViewOperationEventArgs.Operation.ZoomIn:
-                    BackgroundPreview.View.AddZoomForce(-0.5);
-                    break;
-
-                case ViewOperationEventArgs.Operation.ZoomOut:
-                    BackgroundPreview.View.AddZoomForce(0.5);
-                    break;
-            }
-        }
-
         private void DynamoLoadedViewExtensionHandler(ViewLoadedParams loadedParams, IEnumerable<IViewExtension> extensions)
         {
             foreach (var ext in extensions)
@@ -1289,7 +1260,6 @@ namespace Dynamo.Controls
             WorkspaceTabs.SelectedIndex = 0;
             dynamoViewModel = (DataContext as DynamoViewModel);
             dynamoViewModel.Model.RequestLayoutUpdate += vm_RequestLayoutUpdate;
-            dynamoViewModel.RequestViewOperation += DynamoViewModelRequestViewOperation;
             dynamoViewModel.PostUiActivationCommand.Execute(null);
 
             // Initialize Guide Manager as a member on Dynamo ViewModel so other than guided tour,
@@ -1331,7 +1301,6 @@ namespace Dynamo.Controls
 
             dynamoViewModel.RequestClose += DynamoViewModelRequestClose;
             dynamoViewModel.RequestSaveImage += DynamoViewModelRequestSaveImage;
-            dynamoViewModel.RequestSave3DImage += DynamoViewModelRequestSave3DImage;
             dynamoViewModel.SidebarClosed += DynamoViewModelSidebarClosed;
 
             dynamoViewModel.Model.RequestsCrashPrompt += Controller_RequestsCrashPrompt;
@@ -1356,18 +1325,6 @@ namespace Dynamo.Controls
 
             sharedViewExtensionLoadedParams = new ViewLoadedParams(this, dynamoViewModel);
             this.DynamoLoadedViewExtensionHandler(sharedViewExtensionLoadedParams, viewExtensionManager.ViewExtensions);
-
-            BackgroundPreview = new Watch3DView { Name = BackgroundPreviewName };
-            background_grid.Children.Add(BackgroundPreview);
-            BackgroundPreview.DataContext = dynamoViewModel.BackgroundPreviewViewModel;
-            var vizBinding = new Binding
-            {
-                Source = dynamoViewModel.BackgroundPreviewViewModel,
-                Path = new PropertyPath("Active"),
-                Mode = BindingMode.TwoWay,
-                Converter = new BooleanToVisibilityConverter()
-            };
-            BackgroundPreview.SetBinding(VisibilityProperty, vizBinding);
 
             TrackStartupAnalytics();
 
@@ -1628,44 +1585,6 @@ namespace Dynamo.Controls
         {
             var workspace = this.ChildOfType<WorkspaceView>();
             workspace.IsWorkSpaceRenderValidAsImage(false, e.Path);
-        }
-
-        private void DynamoViewModelRequestSave3DImage(object sender, ImageSaveEventArgs e)
-        {
-            var dpiX = 0.0;
-            var dpiY = 0.0;
-
-            // dpi aware, otherwise incorrect images are created
-            try
-            {
-                var scale = VisualTreeHelper.GetDpi(this);
-                dpiX = scale.PixelsPerInchX;
-                dpiY = scale.PixelsPerInchY;
-            }
-            catch (Exception ex)
-            {
-                Log(ex.ToString());
-
-                dpiX = 96;
-                dpiY = 96;
-            }
-            
-            var bitmapSource = BackgroundPreview.View.RenderBitmap();
-            // this image only really needs 24bits per pixel but to match previous implementation we'll use 32bit images.
-            var rtBitmap = new RenderTargetBitmap(bitmapSource.PixelWidth, bitmapSource.PixelHeight, dpiX, dpiY, PixelFormats.Pbgra32);
-            rtBitmap.Render(BackgroundPreview.View);
-            var encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(rtBitmap));
-
-            if (File.Exists(e.Path))
-            {
-                File.Delete(e.Path);
-            }
-
-            using (var stream = File.Create(e.Path))
-            {
-                encoder.Save(stream);
-            }
         }
 
         private void DynamoViewModelRequestClose(object sender, EventArgs e)
@@ -1955,7 +1874,6 @@ namespace Dynamo.Controls
             }
 
             dynamoViewModel.Model.RequestLayoutUpdate -= vm_RequestLayoutUpdate;
-            dynamoViewModel.RequestViewOperation -= DynamoViewModelRequestViewOperation;
 
             //PACKAGE MANAGER
             dynamoViewModel.RequestPackagePublishDialog -= DynamoViewModelRequestPackageManager;
@@ -1970,7 +1888,6 @@ namespace Dynamo.Controls
 
             dynamoViewModel.RequestClose -= DynamoViewModelRequestClose;
             dynamoViewModel.RequestSaveImage -= DynamoViewModelRequestSaveImage;
-            dynamoViewModel.RequestSave3DImage -= DynamoViewModelRequestSave3DImage;
 
             dynamoViewModel.SidebarClosed -= DynamoViewModelSidebarClosed;
 
@@ -2015,7 +1932,6 @@ namespace Dynamo.Controls
           
 
             viewExtensionManager.MessageLogged -= Log;
-            BackgroundPreview = null;
             background_grid.Children.Clear();
 
             //COMMANDS
@@ -2044,28 +1960,13 @@ namespace Dynamo.Controls
             Analytics.TrackActivityStatus(HeartBeatType.User.ToString());
             if (e.Key != Key.Escape || !IsMouseOver) return;
 
-            var vm = dynamoViewModel.BackgroundPreviewViewModel;
-
-
             // ESC key to navigate has long lag on some machines.
             // This issue was caused by using KeyEventArgs.IsRepeated API
             // In order to fix this we need to use our own extension method DelayInvoke to determine
             // whether ESC key is being held down or not
-            if (!IsEscKeyPressed && !vm.NavigationKeyIsDown)
+            if (!IsEscKeyPressed)
             {
                 IsEscKeyPressed = true;
-                dynamoViewModel.UIDispatcher.DelayInvoke(navigationInterval, () =>
-                {
-                    if (IsEscKeyPressed)
-                    {
-                        vm.NavigationKeyIsDown = true;
-                    }
-                });
-            }
-
-            else
-            {
-                vm.CancelNavigationState();
             }
 
             e.Handled = true;
@@ -2076,12 +1977,6 @@ namespace Dynamo.Controls
             if (e.Key != Key.Escape) return;
 
             IsEscKeyPressed = false;
-            if (dynamoViewModel.BackgroundPreviewViewModel.CanNavigateBackground)
-            {
-                dynamoViewModel.BackgroundPreviewViewModel.NavigationKeyIsDown = false;
-                dynamoViewModel.EscapeCommand.Execute(null);
-                e.Handled = true;
-            }
         }
 
         private void WorkspaceTabs_SelectionChanged(object sender, SelectionChangedEventArgs e)

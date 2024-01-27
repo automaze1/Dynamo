@@ -12,7 +12,6 @@ using Dynamo.Models;
 using Dynamo.Utilities;
 using Dynamo.ViewModels;
 using Dynamo.Wpf.Utilities;
-using Dynamo.Wpf.ViewModels.Watch3D;
 
 namespace DynamoSandbox
 {
@@ -141,11 +140,6 @@ namespace DynamoSandbox
                    {
                        CommandFilePath = commandFilePath,
                        DynamoModel = model,
-                       Watch3DViewModel =
-                           HelixWatch3DViewModel.TryCreateHelixWatch3DViewModel(
-                               null,
-                               new Watch3DViewModelStartupParams(model),
-                               model.Logger),
                        ShowLogin = true
                    });
 

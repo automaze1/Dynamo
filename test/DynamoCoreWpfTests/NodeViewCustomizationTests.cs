@@ -45,18 +45,6 @@ namespace DynamoCoreWpfTests
             base.GetLibrariesToPreload(libraries);
         }
 
-        [Test, Category("DisplayHardwareDependent")]
-        public void Watch3DHasViewer()
-        {
-            var path = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Process) + ";" + Model.PathManager.DynamoCoreDirectory;
-            Environment.SetEnvironmentVariable("Path", path, EnvironmentVariableTarget.Process);
-
-            Open(@"UI\CoreUINodes.dyn");
-            var nodeView = NodeViewWithGuid("6869c998-b819-4686-8849-6f36162c4182"); // NodeViewOf<Watch3D>();
-            var watchView = nodeView.ChildrenOfType<Watch3DView>().FirstOrDefault();
-            Assert.NotNull(watchView);
-        }
-
         [Test]
         public void StringInputHasTextboxAndCorrectValue()
         {

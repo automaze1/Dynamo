@@ -1,15 +1,11 @@
-using System;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Linq;
-using System.Reflection;
-using System.Windows.Input;
 using Dynamo.DocumentationBrowser.Properties;
 using Dynamo.Logging;
-using Dynamo.ViewModels;
-using SharpDX.DXGI;
 using Dynamo.Utilities;
+using Dynamo.ViewModels;
+using System;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Dynamo.DocumentationBrowser
 {

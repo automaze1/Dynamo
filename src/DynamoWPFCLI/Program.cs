@@ -5,10 +5,8 @@ using System.Runtime.Versioning;
 #endif
 using System.Threading;
 using Dynamo.Applications;
-using Dynamo.Logging;
 using Dynamo.Models;
 using Dynamo.ViewModels;
-using Dynamo.Wpf.ViewModels.Watch3D;
 using static System.Windows.Threading.Dispatcher;
 
 namespace DynamoWPFCLI
@@ -102,12 +100,7 @@ namespace DynamoWPFCLI
             var viewModel = DynamoViewModel.Start(
                 new DynamoViewModel.StartConfiguration()
                 {
-                    DynamoModel = model,
-                    Watch3DViewModel = new DefaultWatch3DViewModel(null, new Watch3DViewModelStartupParams(model))
-                    {
-                        Active = false,
-                        CanBeActivated = false
-                    }
+                    DynamoModel = model
                 });
 
             cmdLineArgs.ImportedPaths.ToList().ForEach(path =>

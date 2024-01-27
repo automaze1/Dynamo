@@ -478,37 +478,7 @@ namespace DynamoCoreWpfTests
             #endregion
         }
 
-        [Test, Apartment(ApartmentState.STA)]
-        [Category("DynamoUI")]
-        public void PreferenceSetting_RenderPrecision()
-        {
-            // Test that RenderPrecision setting works as expected
-            ViewModel.RenderPackageFactoryViewModel.MaxTessellationDivisions = 256;
-            Assert.AreEqual(256, ViewModel.Model.PreferenceSettings.RenderPrecision);
-
-            ViewModel.RenderPackageFactoryViewModel.MaxTessellationDivisions = 128;
-            Assert.AreEqual(128, ViewModel.Model.PreferenceSettings.RenderPrecision);
-
-            // Test serialization of RenderPrecision
-            string tempPath = System.IO.Path.GetTempPath();
-            tempPath = Path.Combine(tempPath, "userPreference.xml");
-
-            PreferenceSettings initalSetting = new PreferenceSettings();
-            PreferenceSettings resultSetting;
-
-            initalSetting.RenderPrecision = 256;
-
-            initalSetting.Save(tempPath);
-            resultSetting = PreferenceSettings.Load(tempPath);
-
-            Assert.AreEqual(resultSetting.RenderPrecision, initalSetting.RenderPrecision);
-
-            // Test loading old settings file without render precision attribute
-            var filePath = Path.Combine(GetTestDirectory(ExecutingDirectory), @"settings\DynamoSettings-WithoutRenderPrecision.xml");
-            PreferenceSettings WithoutRenderPrecision = PreferenceSettings.Load(filePath);
-            Assert.AreEqual(WithoutRenderPrecision.RenderPrecision, 128);
-        }
-
+        
         [Test, Apartment(ApartmentState.STA)]
         [Category("DynamoUI")]
         public void PreferenceSetting_GroupStyles()
@@ -555,18 +525,6 @@ namespace DynamoCoreWpfTests
         {
             // Test Case to ensure that the link for these persistent variable
             // between DynamoViewModel, Model is not broken or replaced.
-            #region BackgroundPreviewActive
-
-            var backgroundPreviewName = ViewModel.BackgroundPreviewViewModel.PreferenceWatchName;
-            bool expectedValue = !ViewModel.Model.PreferenceSettings.GetIsBackgroundPreviewActive(backgroundPreviewName);
-            ViewModel.ToggleFullscreenWatchShowing(null);
-            Assert.AreEqual(expectedValue, ViewModel.Model.PreferenceSettings.GetIsBackgroundPreviewActive(backgroundPreviewName));
-
-            expectedValue = !ViewModel.Model.PreferenceSettings.GetIsBackgroundPreviewActive(backgroundPreviewName);
-            ViewModel.ToggleFullscreenWatchShowing(null);
-            Assert.AreEqual(expectedValue, ViewModel.Model.PreferenceSettings.GetIsBackgroundPreviewActive(backgroundPreviewName));
-            #endregion
-
             #region ConsoleHeight
             int expectedHeight = 100;
             ViewModel.ToggleConsoleShowing(null);
@@ -618,13 +576,10 @@ namespace DynamoCoreWpfTests
 
             initalSetting.ConnectorType = ConnectorType.BEZIER;
             initalSetting.ConsoleHeight = 100;
-            initalSetting.SetIsBackgroundPreviewActive(backgroundPreviewName, true);
 
             initalSetting.Save(tempPath);
             resultSetting = PreferenceSettings.Load(tempPath);
 
-            Assert.AreEqual(resultSetting.GetIsBackgroundPreviewActive(backgroundPreviewName),
-                initalSetting.GetIsBackgroundPreviewActive(backgroundPreviewName));
             Assert.AreEqual(resultSetting.ConnectorType, initalSetting.ConnectorType);
             Assert.AreEqual(resultSetting.ConsoleHeight, initalSetting.ConsoleHeight);
             #endregion
@@ -632,13 +587,10 @@ namespace DynamoCoreWpfTests
             #region Second Test
             initalSetting.ConnectorType = ConnectorType.POLYLINE;
             initalSetting.ConsoleHeight = 0;
-            initalSetting.SetIsBackgroundPreviewActive(backgroundPreviewName, false);
-
+            
             initalSetting.Save(tempPath);
             resultSetting = PreferenceSettings.Load(tempPath);
 
-            Assert.AreEqual(resultSetting.GetIsBackgroundPreviewActive(backgroundPreviewName),
-                initalSetting.GetIsBackgroundPreviewActive(backgroundPreviewName));
             Assert.AreEqual(resultSetting.ConnectorType, initalSetting.ConnectorType);
             Assert.AreEqual(resultSetting.ConsoleHeight, initalSetting.ConsoleHeight);
 
@@ -656,16 +608,6 @@ namespace DynamoCoreWpfTests
         {
             var settings = new PreferenceSettings();
             Assert.False(settings.ShowEdges);
-        }
-
-        [Test]
-        public void PreferenceSettings_ShowEdges_Toggle()
-        {
-            ViewModel.RenderPackageFactoryViewModel.ShowEdges = false;
-            Assert.False(Model.PreferenceSettings.ShowEdges);
-
-            ViewModel.RenderPackageFactoryViewModel.ShowEdges = true;
-            Assert.True(Model.PreferenceSettings.ShowEdges);
         }
 
         [Test]

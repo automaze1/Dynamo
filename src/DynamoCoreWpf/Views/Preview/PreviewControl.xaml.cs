@@ -392,7 +392,7 @@ namespace Dynamo.UI.Controls
 
                     if (largeContentGrid.Children.Count == 0)
                     {
-                        var tree = new WatchTree(new WatchViewModel(nodeViewModel.DynamoViewModel.BackgroundPreviewViewModel.AddLabelForPath));
+                        var tree = new WatchTree(new WatchViewModel(x => { }));
                         tree.treeView1.ItemContainerGenerator.StatusChanged += WatchContainer_StatusChanged;
                         largeContentGrid.Children.Add(tree);
                     }

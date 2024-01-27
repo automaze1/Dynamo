@@ -7,7 +7,6 @@ using System.Threading;
 using System.Xml;
 using Dynamo.Applications;
 using Dynamo.ViewModels;
-using Dynamo.Wpf.ViewModels.Watch3D;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
@@ -232,12 +231,6 @@ namespace Dynamo.Tests
                 new DynamoViewModel.StartConfiguration()
                 {
                     DynamoModel = this.CurrentDynamoModel,
-                    Watch3DViewModel =
-                        new DefaultWatch3DViewModel(null, new Watch3DViewModelStartupParams(this.CurrentDynamoModel))
-                        {
-                            Active = false,
-                            CanBeActivated = false
-                        }
                 });
 
             var runner = new DynamoWPFCLI.CommandLineRunnerWPF(viewModel);

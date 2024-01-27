@@ -294,9 +294,7 @@ namespace Dynamo.UI.Controls
         {
             get
             {
-                return vm.BackgroundPreviewViewModel == null || !vm.BackgroundPreviewViewModel.CanNavigateBackground
-                    ? Wpf.Properties.Resources.DynamoViewToolbarExportButtonTooltip
-                    : Wpf.Properties.Resources.DynamoViewToolbarExport3DButtonTooltip;
+                return Wpf.Properties.Resources.DynamoViewToolbarExportButtonTooltip;
             }
             set
             {
@@ -307,13 +305,6 @@ namespace Dynamo.UI.Controls
         public ImageExportShortcutBarItem(DynamoViewModel viewModel)
         {
             vm = viewModel;
-            vm.BackgroundPreviewViewModel.PropertyChanged += BackgroundPreviewViewModel_PropertyChanged;
-        }
-
-        private void BackgroundPreviewViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName != "CanNavigateBackground") return;
-            RaisePropertyChanged("ShortcutToolTip");
         }
     }
 }

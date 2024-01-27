@@ -68,10 +68,6 @@
       <Name>DynamoCoreWpf</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\DynamoManipulation\DynamoManipulation.csproj">
-      <Project>{33f88e8c-cc3c-4237-8aa9-cc891efcabfa}</Project>
-      <Name>DynamoManipulation</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\DynamoPackagesWPF\DynamoPackagesWPF.csproj">
       <Project>{47D2166C-5261-4093-9660-E72B7035E666}</Project>
       <Name>DynamoPackagesWPF</Name>

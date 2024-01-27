@@ -24,7 +24,6 @@ using Dynamo.UI.Prompts;
 using Dynamo.Utilities;
 using Dynamo.Wpf.ViewModels;
 using Dynamo.Wpf.ViewModels.Core;
-using Dynamo.Wpf.ViewModels.Watch3D;
 using DynamoUtilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -235,13 +234,6 @@ namespace Dynamo.ViewModels
                 runPeriod);
             }
         }
-
-        /// <summary>
-        /// Gets the Camera Data. This is used when serializing Camera Data in the View block
-        /// of Graph.Json.
-        /// </summary>
-        [JsonProperty("Camera")]
-        public CameraData Camera => DynamoViewModel.BackgroundPreviewViewModel?.GetCameraInformation() ?? new CameraData();
 
         /// <summary>
         /// ViewModel that is used in InCanvasSearch in context menu and called by Shift+DoubleClick.
@@ -462,18 +454,6 @@ namespace Dynamo.ViewModels
         {
             get { return Model.HasUnsavedChanges; }
             set { Model.HasUnsavedChanges = value; }
-        }
-
-        private ObservableCollection<Watch3DFullscreenViewModel> _watches = new ObservableCollection<Watch3DFullscreenViewModel>();
-        [JsonIgnore]
-        public ObservableCollection<Watch3DFullscreenViewModel> Watch3DViewModels
-        {
-            get { return _watches; }
-            set
-            {
-                _watches = value;
-                RaisePropertyChanged("Watch3DViewModels");
-            }
         }
 
         /// <summary>

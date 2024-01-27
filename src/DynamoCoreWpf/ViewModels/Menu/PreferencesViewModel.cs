@@ -696,13 +696,9 @@ namespace Dynamo.ViewModels
         {
             get
             {
-                return dynamoViewModel.RenderPackageFactoryViewModel.ShowEdges;
+                return false;
             }
-            set
-            {
-                dynamoViewModel.RenderPackageFactoryViewModel.ShowEdges = value;
-                RaisePropertyChanged(nameof(ShowEdges));
-            }
+            set { }
         }
 
         /// <summary>
@@ -728,29 +724,9 @@ namespace Dynamo.ViewModels
         {
             get
             {
-                return dynamoViewModel.BackgroundPreviewViewModel.IsolationMode;
+                return false;
             }
-            set
-            {
-                dynamoViewModel.BackgroundPreviewViewModel.IsolationMode = value;
-                RaisePropertyChanged(nameof(IsolateSelectedGeometry));
-            }
-        }
-
-        /// <summary>
-        /// This property is bind to the Render Precision Slider and control the amount of tessellation applied to objects in background preview
-        /// </summary>
-        public int TessellationDivisions
-        {
-            get
-            {
-                return dynamoViewModel.RenderPackageFactoryViewModel.MaxTessellationDivisions;
-            }
-            set
-            {
-                dynamoViewModel.RenderPackageFactoryViewModel.MaxTessellationDivisions = value;
-                RaisePropertyChanged(nameof(TessellationDivisions));
-            }
+            set { }
         }
 
         /// <summary>
@@ -1331,23 +1307,13 @@ namespace Dynamo.ViewModels
             runSettingsIsChecked = preferenceSettings.DefaultRunType;
             var engine = PythonEnginesList.FirstOrDefault(x => x.Equals(preferenceSettings.DefaultPythonEngine));
             SelectedPythonEngine = string.IsNullOrEmpty(engine) ? Res.DefaultPythonEngineNone : preferenceSettings.DefaultPythonEngine;
-            dynamoViewModel.RenderPackageFactoryViewModel.MaxTessellationDivisions = preferenceSettings.RenderPrecision;
-            dynamoViewModel.RenderPackageFactoryViewModel.ShowEdges = preferenceSettings.ShowEdges;
             PackagePathsForInstall = null;
             PackagePathsViewModel?.InitializeRootLocations();
             SelectedPackagePathForInstall = preferenceSettings.SelectedPackagePathForInstall;
 
             dynamoViewModel.IsShowingConnectors = preferenceSettings.ShowConnector;
             dynamoViewModel.IsShowingConnectorTooltip = preferenceSettings.ShowConnectorToolTip;
-            foreach (var item in dynamoViewModel.Watch3DViewModels)
-            {
-                var preferenceItem = preferenceSettings.BackgroundPreviews.Where(i => i.Name == item.PreferenceWatchName).FirstOrDefault();
-                if (preferenceItem != null)
-                {
-                    item.Active = preferenceItem.IsActive;
-                }
-            }
-
+            
             preferenceSettings.SanitizeValues();
             RaisePropertyChanged(string.Empty);
             return true;
@@ -1730,9 +1696,6 @@ namespace Dynamo.ViewModels
                     goto default;
                 case nameof(PythonTemplateFilePath):
                     description = Res.ResourceManager.GetString(nameof(Res.PreferencesSettingCustomPythomTemplate), System.Globalization.CultureInfo.InvariantCulture);
-                    goto default;
-                case nameof(TessellationDivisions):
-                    description = Res.ResourceManager.GetString(nameof(Res.PreferencesViewVisualSettingsRenderPrecision), System.Globalization.CultureInfo.InvariantCulture);
                     goto default;
                 case nameof(SelectedPythonEngine):
                     description = Res.ResourceManager.GetString(nameof(Res.PreferencesViewDefaultPythonEngine), System.Globalization.CultureInfo.InvariantCulture);
