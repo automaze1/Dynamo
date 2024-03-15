@@ -1987,6 +1987,10 @@ namespace Dynamo.ViewModels
 
                 if (!isBackup && hasSaved)
                 {
+                    //Also save the snapshot for the preview.
+                    var snapShotImagePath = Path.ChangeExtension(path, "png");
+                    SaveImage(snapShotImagePath);
+
                     AddToRecentFiles(path);
 
                     if ((currentWorkspaceViewModel?.IsHomeSpace ?? true) && HomeSpace.HasRunWithoutCrash && Model.CurrentWorkspace.IsValidForFDX && currentWorkspaceViewModel.Checksum != string.Empty) 

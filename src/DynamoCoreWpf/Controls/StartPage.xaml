@@ -9,13 +9,67 @@
              xmlns:configuration="clr-namespace:Dynamo.Configuration;assembly=DynamoCore"
              mc:Ignorable="d"
              d:DesignWidth="640"
-             d:DesignHeight="480"
-             Margin="0,-1,0,0">
+             d:DesignHeight="480">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="{x:Static ui:SharedDictionaryManager.DynamoModernDictionaryUri}" />
             </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="TabDecorator"  TargetType="TabItem">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabItem">
+                            <Border Name="Border" BorderThickness="1,1,1,0" BorderBrush="Gainsboro" CornerRadius="4,4,0,0" Margin="2,0">
+                                <ContentPresenter x:Name="ContentSite"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    ContentSource="Header"
+                                    Margin="10,2"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="LightSkyBlue" />
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="False">
+                                    <Setter TargetName="Border" Property="Background" Value="GhostWhite" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="ButtonHighlighter" TargetType="Border">
+                <Setter Property="BorderBrush" Value="Gray"/>
+                <Setter Property="BorderThickness" Value="1,1,1,1"/>
+                <Setter Property="RenderTransformOrigin" Value="0.5, 0.5"/>
+                <Setter Property="RenderTransform">
+                    <Setter.Value>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="BorderBrush" Value="Gray"/>
+                        <Setter Property="BorderThickness" Value="3,1,1,3"/>
+                        <Trigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" To="1.2" Duration="0:0:0.005"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" To="1.2" Duration="0:0:0.005"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" To="1" Duration="0:0:0.1"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" To="1" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -25,192 +79,111 @@
           Drop="StartPage_OnDrop">
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="150"></RowDefinition>
+            <RowDefinition Height="150"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <!-- Begin top part (i.e. the "Start" tab) -->
-        <Border HorizontalAlignment="Stretch" Background="#3C3C3C" Margin="220,-40,0,50"></Border>
-  
         <!-- Begin Dynamo logo -->
         <Image Name="StartPageLogo"
-               Grid.Row="1"
+               Grid.Row="0"
                Width="250"
                Margin="0,32,0,32"
                HorizontalAlignment="Center"/>
 
-        <!-- Begin inner grid control for all other list boxes -->
-        <ScrollViewer HorizontalScrollBarVisibility="Hidden"
-                      HorizontalAlignment="Stretch"
-                      Grid.Row="2">
-
-            <Grid Name="innerGrid"
-                  HorizontalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="285"></ColumnDefinition>
-                    <ColumnDefinition Width="110"></ColumnDefinition>
-                    <ColumnDefinition Width="285"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-
-                <!-- Left rows of list boxes -->
-                <StackPanel Name="leftPanel"
-                            Grid.Column="0"
-                            Orientation="Vertical">
-
-                    <Border BorderThickness="0,0,0,1"
-                            BorderBrush="#dfd8cf">
-                        <TextBlock Text="{x:Static p:Resources.StartPageFiles}"
-                                   FontSize="18"
-                                   FontFamily="{StaticResource ArtifaktElementBold}"
-                                   Foreground="#3395a2"
-                                   Margin="0,0,12,0"
-                                   HorizontalAlignment="Right" />
-                    </Border>
-
-                    <ListBox Name="filesListBox"
-                             ItemContainerStyle="{StaticResource StartPageListBoxItem}"
-                             Style="{StaticResource StartPageListBox}"
-                             SelectionChanged="OnItemSelectionChanged">
-                    </ListBox>
-
-                    <Border BorderThickness="0,0,0,1"
-                            BorderBrush="#dfd8cf">
-                        <TextBlock Text="{x:Static p:Resources.StartPageRecent}"
-                                   FontSize="18"
-                                   FontFamily="{StaticResource ArtifaktElementBold}"
-                                   Foreground="#62895b"
-                                   Margin="0,0,12,0"
-                                   HorizontalAlignment="Right" />
-                    </Border>
-
-                    <ListBox Name="recentListBox"
-                             ItemContainerStyle="{StaticResource StartPageListBoxItem}"
-                             Style="{StaticResource StartPageListBox}"
-                             SelectionChanged="OnItemSelectionChanged">
-                    </ListBox>
-
-                    <Border BorderThickness="0,0,0,1"
-                            BorderBrush="#dfd8cf">
-                        <TextBlock Text="{Binding Path=BackupTitle}"
-                                   FontSize="18"
-                                   FontFamily="{StaticResource ArtifaktElementBold}"
-                                   Foreground="#ad5446"
-                                   Margin="0,0,12,0"
-                                   HorizontalAlignment="Right" />
-                    </Border>
-
-                    <ListBox Name="backupFilesList"
-                             ItemContainerStyle="{StaticResource StartPageListBoxItem}"
-                             Style="{StaticResource StartPageListBox}"
-                             SelectionChanged="OnItemSelectionChanged"
-                             Margin="0,0,12,0">
-                    </ListBox>
-
-                    <Grid Name="backupButtons"
-                          Background="White"
-                          HorizontalAlignment="Stretch">
-
-                        <Label Grid.Column="0"
-                               Name="backupLocation"
-                               FontFamily="{StaticResource ArtifaktElementRegular}"
-                               Margin="0,0,0,0"
-                               HorizontalAlignment="Right"
-                               Style="{StaticResource StartPageLabel}"
-                               Content="{x:Static p:Resources.StartPageBackupLocation}"
-                               MouseLeftButtonUp="ShowBackupFilesInFolder" />
-                    </Grid>
-                </StackPanel>
-
-                <!-- Right rows of list boxes -->
-                <StackPanel Name="rightPanel"
-                            Grid.Column="2"
-                            Orientation="Vertical">
-
-                    <Border BorderThickness="0,0,0,1"
-                            BorderBrush="#dfd8cf">
-                        <TextBlock Text="{x:Static p:Resources.StartPageAsk}"
-                                   FontSize="18"
-                                   FontFamily="{StaticResource ArtifaktElementBold}"
-                                   Foreground="#a55553"
-                                   Margin="0,0,12,0"
-                                   HorizontalAlignment="Right" />
-                    </Border>
-
-                    <ListBox Name="askListBox"
-                             ItemContainerStyle="{StaticResource StartPageListBoxItem}"
-                             Style="{StaticResource StartPageListBox}"
-                             SelectionChanged="OnItemSelectionChanged">
-                    </ListBox>
-
-                    <Border BorderThickness="0,0,0,1"
-                            BorderBrush="#dfd8cf">
-                        <TextBlock Text="{x:Static p:Resources.StartPageReference}"
-                                   FontSize="18"
-                                   FontFamily="{StaticResource ArtifaktElementBold}"
-                                   Foreground="#6f4c76"
-                                   Margin="0,0,12,0"
-                                   HorizontalAlignment="Right" />
-                    </Border>
-
-                    <ListBox Name="referenceListBox"
-                             ItemContainerStyle="{StaticResource StartPageListBoxItem}"
-                             Style="{StaticResource StartPageListBox}"
-                             SelectionChanged="OnItemSelectionChanged">
-                    </ListBox>
-
-                    <Border BorderThickness="0,0,0,1"
-                            BorderBrush="#dfd8cf">
-                        <TextBlock Text="{x:Static p:Resources.StartPageCode}"
-                                   FontSize="18"
-                                   FontFamily="{StaticResource ArtifaktElementBold}"
-                                   Foreground="#4b9dbf"
-                                   Margin="0,0,12,0"
-                                   HorizontalAlignment="Right" />
-                    </Border>
-
-                    <ListBox Name="codeListBox"
-                             ItemContainerStyle="{StaticResource StartPageListBoxItem}"
-                             Style="{StaticResource StartPageListBox}"
-                             SelectionChanged="OnItemSelectionChanged">
-                    </ListBox>
-
-                    <Border BorderThickness="0,0,0,1"
-                            BorderBrush="#dfd8cf">
-                        <TextBlock Text="{x:Static p:Resources.StartPageSamples}"
-                                   FontSize="18"
-                                   FontFamily="{StaticResource ArtifaktElementBold}"
-                                   Foreground="#5e8f80"
-                                   Margin="0,0,12,0"
-                                   HorizontalAlignment="Right" />
-                    </Border>
-
-                    <TreeView x:Name="sampleFileTreeView"
-                              Background="#FFFFFF"
-                              Grid.Row="3"
-                              Grid.ColumnSpan="2"
-                              BorderThickness="0"
-                              FontSize="16"
-                              ItemContainerStyle="{StaticResource StartPageTreeViewItem}"
-                              Style="{StaticResource StartPageTreeView}">
-                        <TreeView.ItemTemplate>
-                            <HierarchicalDataTemplate DataType="{x:Type l:SampleFileEntry}"
-                                                      ItemsSource="{Binding Path=Children}">
-                                <TextBlock Text="{Binding Path=FileName}"
-                                           MouseLeftButtonUp="OnSampleFileSelected"
-                                           Cursor="Hand" />
-                            </HierarchicalDataTemplate>
-                        </TreeView.ItemTemplate>
-                    </TreeView>
-
-                    <Label FontFamily="{StaticResource ArtifaktElementBold}"
-                           Margin="0,0,12,0"
-                           HorizontalAlignment="Left"
-                           Style="{StaticResource StartPageLabel}"
-                           Content="{x:Static p:Resources.StartPageShowSamples}"
-                           MouseLeftButtonUp="ShowSamplesInFolder" />
-                </StackPanel>
-            </Grid>
-        </ScrollViewer>
+        <!-- Big Buttons to start a workflow -->
+        <Grid Grid.Row="1">
+            <ListView Name="commandListItems" HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                      BorderThickness="0"
+                      SelectionChanged="OnItemSelectionChanged"
+                      Margin="50,0,0,0">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Grid.Column="0"
+                                Background="Transparent"
+                                CornerRadius="10"
+                                BorderThickness="1"
+                                BorderBrush="Gray"
+                                MinWidth="300"
+                                Height="125">
+                            <Border.Effect>
+                                <DropShadowEffect Color="DarkGray" Direction="315" ShadowDepth="2" Opacity="0.5"/>
+                            </Border.Effect>
+                            <TextBlock Text="{Binding Caption}" Foreground="SlateGray" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="28" TextWrapping="Wrap"/>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+        <StackPanel Grid.Row="2" Margin="55,50,0,0">
+            <TextBlock Text="Your DataFlow" Foreground="SlateGray" FontSize="20"
+               HorizontalAlignment="Left" Margin="0,20,0,5"/>
+            <Rectangle Height="5" Width="125" HorizontalAlignment="Left" Fill="Orange"/>
+            <TabControl Margin="0,10,0,0" BorderThickness="0">
+                <TabItem Style="{StaticResource TabDecorator}" Header="Recent" FontSize="16" BorderThickness="0">
+                    <ListView Name="recentListItems" HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              SelectionChanged="OnItemSelectionChanged"
+                              BorderThickness="0">
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="5" Orientation="Vertical">
+                                    <StackPanel.ToolTip>
+                                        <Binding Path="ToolTip"/>
+                                    </StackPanel.ToolTip>
+                                    <Border Width="100" Height="100" BorderBrush="Gray" BorderThickness="1" Margin="0,10,0,0">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="DarkGray" Direction="315" ShadowDepth="2" Opacity="0.5"/>
+                                        </Border.Effect>
+                                        <!-- Image -->
+                                        <Image Source="{Binding Icon}" Width="100" Height="100" Stretch="UniformToFill"/>
+                                    </Border>
+                                    <!-- Name -->
+                                    <TextBlock Text="{Binding Caption}" FontSize="12" Margin="0,5,0,0" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </TabItem>
+                <TabItem Style="{StaticResource TabDecorator}" Header="Samples" FontSize="16" BorderThickness="0">
+                    <ListView Name="sampleListItems" HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              SelectionChanged="OnItemSelectionChanged"
+                              BorderThickness="0">
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="5" Orientation="Vertical">
+                                    <StackPanel.ToolTip>
+                                        <Binding Path="ToolTip"/>
+                                    </StackPanel.ToolTip>
+                                    <Border Style="{StaticResource ButtonHighlighter}" Width="100" Height="100" BorderThickness="3,1,1,3" Margin="0,10,0,0">
+                                        <!-- Image -->
+                                        <Image Source="{Binding Icon}" Stretch="UniformToFill"/>
+                                    </Border>
+                                    <!-- Name -->
+                                    <TextBlock Text="{Binding Caption}" Margin="0,5,0,0" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </TabItem>
+            </TabControl>
+        </StackPanel>
     </Grid>
 </UserControl>

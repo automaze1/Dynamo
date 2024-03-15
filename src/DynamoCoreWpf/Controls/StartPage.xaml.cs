@@ -56,12 +56,12 @@ namespace Dynamo.UI.Controls
             ExternalUrl
         }
 
-        internal StartPageListItem(string caption)
+        public StartPageListItem(string caption)
         {
             this.Caption = caption;
         }
 
-        internal StartPageListItem(string caption, string iconPath)
+        public StartPageListItem(string caption, string iconPath)
         {
             this.Caption = caption;
             this.icon = LoadBitmapImage(iconPath);
@@ -92,6 +92,10 @@ namespace Dynamo.UI.Controls
 
         private BitmapImage LoadBitmapImage(string iconPath)
         {
+            if (File.Exists(iconPath))
+            {
+                return new BitmapImage(new Uri(iconPath, UriKind.Absolute));
+            }
             var format = @"pack://application:,,,/DynamoCoreWpf;component/UI/Images/StartPage/{0}";
             iconPath = string.Format(format, iconPath);
             return new BitmapImage(new Uri(iconPath, UriKind.Absolute));
@@ -376,8 +380,17 @@ namespace Dynamo.UI.Controls
                     // only without file type. Otherwise, simply take extension substring skipping the 'dot'.
                     var subScript = extension.IndexOf(".") == 0 ? extension.Substring(1) : "";
                     var caption = Path.GetFileNameWithoutExtension(filePath);
+                    if(caption.Length > 15)
+                    {
+                        caption = $"{caption.Substring(0, 12)}...";
+                    }
+                    var iconpath = Path.ChangeExtension(filePath, "png");
+                    if (!File.Exists(iconpath))
+                    {
+                        iconpath = "SampleWorkspace.png";
+                    }
 
-                    files.Add(new StartPageListItem(caption)
+                    files.Add(new StartPageListItem(caption, iconpath)
                     {
                         ContextData = filePath,
                         ToolTip = filePath,
@@ -450,7 +463,7 @@ namespace Dynamo.UI.Controls
             InitializeComponent();
             if (StabilityUtils.IsLastShutdownClean)
             {
-                backupFilesList.Visibility = Visibility.Collapsed;
+                //backupFilesList.Visibility = Visibility.Collapsed;
             }
 
             this.Loaded += OnStartPageLoaded;
@@ -463,13 +476,13 @@ namespace Dynamo.UI.Controls
             var startPageViewModel = this.DataContext as StartPageViewModel;
             this.dynamoViewModel = startPageViewModel.DynamoViewModel;
 
-            this.filesListBox.ItemsSource = startPageViewModel.FileOperations;
-            this.askListBox.ItemsSource = startPageViewModel.CommunityLinks;
-            this.referenceListBox.ItemsSource = startPageViewModel.References;
-            this.codeListBox.ItemsSource = startPageViewModel.ContributeLinks;
-            this.recentListBox.ItemsSource = startPageViewModel.RecentFiles;
-            this.sampleFileTreeView.ItemsSource = startPageViewModel.SampleFiles;
-            this.backupFilesList.ItemsSource = startPageViewModel.BackupFiles;
+            this.commandListItems.ItemsSource = startPageViewModel.FileOperations;
+            //this.askListBox.ItemsSource = startPageViewModel.CommunityLinks;
+            //this.referenceListBox.ItemsSource = startPageViewModel.References;
+            //this.codeListBox.ItemsSource = startPageViewModel.ContributeLinks;
+            this.recentListItems.ItemsSource = startPageViewModel.RecentFiles;
+            this.sampleListItems.ItemsSource = startPageViewModel.SampleFiles;
+            //this.backupFilesList.ItemsSource = startPageViewModel.BackupFiles;
 
             var id = Wpf.Interfaces.ResourceNames.StartPage.Image;
             StartPageLogo.Source = dynamoViewModel.BrandingResourceProvider.GetImageSource(id);
@@ -488,26 +501,6 @@ namespace Dynamo.UI.Controls
             // clicked, still triggers "selection changed" notification.
             var listBox = sender as ListBox;
             listBox.SelectedIndex = -1;
-        }
-
-        private void OnSampleFileSelected(object sender, RoutedEventArgs e)
-        {
-            var dp = e.OriginalSource as DependencyObject;
-            var treeViewItem = WpfUtilities.FindUpVisualTree<TreeViewItem>(dp) as TreeViewItem;
-            if (sampleFileTreeView.SelectedItem != null)
-                treeViewItem.IsExpanded = !treeViewItem.IsExpanded;
-
-            var filePath = (sampleFileTreeView.SelectedItem as SampleFileEntry).FilePath;
-
-            if (string.IsNullOrEmpty(filePath))
-                return;
-
-            if (!Path.GetExtension(filePath).Equals(".dyn"))
-                return;
-
-            var dvm = this.dynamoViewModel;
-            if (dvm.OpenCommand.CanExecute(filePath))
-                dvm.OpenCommand.Execute(filePath);
         }
 
         private void ShowSamplesInFolder(object sender, MouseButtonEventArgs e)

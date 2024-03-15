@@ -222,7 +222,8 @@
                                   Height="30"
                                   Margin="4,4,0,4"
                                   StateImage="/DynamoCoreWpf;component/UI/Images/Canvas/canvas-button-geom-states.png"
-                                  CheckImage="/DynamoCoreWpf;component/UI/Images/Canvas/canvas-button-geom-check.png">
+                                  CheckImage="/DynamoCoreWpf;component/UI/Images/Canvas/canvas-button-geom-check.png"
+                                  Visibility="Collapsed">
                     <ui:ImageCheckBox.ToolTip>
                         <ToolTip Width="200" Content="{x:Static p:Resources.InCanvasGeomButtonToolTip}" Style="{StaticResource GenericToolTipLight}"/>
                     </ui:ImageCheckBox.ToolTip>
@@ -235,7 +236,8 @@
                                   Height="30"
                                   Margin="0,4,0,4"
                                   StateImage="/DynamoCoreWpf;component/UI/Images/Canvas/canvas-button-node-states.png"
-                                  CheckImage="/DynamoCoreWpf;component/UI/Images/Canvas/canvas-button-node-check.png">
+                                  CheckImage="/DynamoCoreWpf;component/UI/Images/Canvas/canvas-button-node-check.png"
+                                  Visibility="Collapsed">
                     <ui:ImageCheckBox.ToolTip>
                         <ToolTip Content="{x:Static p:Resources.InCanvasNodeButtonToolTip}" Style="{StaticResource GenericToolTipLight}"/>
                     </ui:ImageCheckBox.ToolTip>
@@ -308,7 +310,8 @@
                               Height="30"
                               HorizontalAlignment="Right"
                               StateImage="/DynamoCoreWpf;component/UI/Images/Canvas/canvas-button-orbit-states.png"
-                              CheckImage="/DynamoCoreWpf;component/UI/Images/Canvas/canvas-button-orbit-check.png">
+                              CheckImage="/DynamoCoreWpf;component/UI/Images/Canvas/canvas-button-orbit-check.png"
+                              Visibility="Collapsed">
                 <ui:ImageCheckBox.ToolTip>
                     <ToolTip Content="{x:Static p:Resources.InCanvasOrbitButtonToolTip}" Style="{StaticResource GenericToolTipLight}"/>
                 </ui:ImageCheckBox.ToolTip>
@@ -320,12 +323,12 @@
                     <Binding Path="IsOrbiting"
                              Mode="OneWay" />
                 </ui:ImageCheckBox.IsChecked>
-                <ui:ImageCheckBox.Visibility>
+                <!--<ui:ImageCheckBox.Visibility>
                     <Binding Path="DataContext.BackgroundPreviewViewModel.CanNavigateBackground"
                              Converter="{StaticResource BooleanToVisibilityConverter}"
                              ConverterParameter="Collapse"
                              RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type controls:DynamoView}}" />
-                </ui:ImageCheckBox.Visibility>
+                </ui:ImageCheckBox.Visibility>-->
             </ui:ImageCheckBox>
             
             <!--Working Range control-->
@@ -334,7 +337,8 @@
                             Height="30"
                             HorizontalAlignment="Right"
                             Click="OnGeometryScaling_Click"
-                            StateImage="/DynamoCoreWpf;component/UI/Images/Canvas/canvas-button-geometry-scaling.png">
+                            StateImage="/DynamoCoreWpf;component/UI/Images/Canvas/canvas-button-geometry-scaling.png"
+                                  Visibility="Hidden">
                 <ui:ImageRepeatButton.ToolTip>
                     <ToolTip Content="{x:Static p:Resources.InCanvasGeometryScalingToolTip}"
                              Style="{StaticResource GenericToolTipLight}"/>

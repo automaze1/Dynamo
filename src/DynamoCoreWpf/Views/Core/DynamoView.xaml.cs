@@ -314,7 +314,6 @@ namespace Dynamo.Controls
             {
                 exportMenu.IsEnabled = enable;
             }
-           
             if (!(shortcutBar is null))
             {
                 shortcutBar.IsNewButtonEnabled = enable;
@@ -1249,6 +1248,19 @@ namespace Dynamo.Controls
         {
             // Do an initial load of the cursor collection
             CursorLibrary.GetCursor(CursorSet.ArcSelect);
+
+            try
+            {
+                var icon = dynamoViewModel.BrandingResourceProvider.GetImageSource(ResourceNames.StartPage.Title);
+                if (icon != null)
+                {
+                    applicationIcon.Source = icon;
+                }
+            }
+            catch (InvalidEnumArgumentException)
+            {
+                //Do nothing
+            }
 
             //Backing up IsFirstRun to determine whether to do certain action
             var isFirstRun = dynamoViewModel.Model.PreferenceSettings.IsFirstRun;
@@ -2852,6 +2864,34 @@ namespace Dynamo.Controls
         {
             if(fileTrustWarningPopup != null)
                 fileTrustWarningPopup.ManagePopupActivation(false);
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
+        }
+
+        private void btnMinimize_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+
+        private void btnMaximize_Click(object sender, RoutedEventArgs e)
+        {
+            if (WindowState == WindowState.Maximized)
+            {
+                WindowState = WindowState.Normal;
+            }
+            else
+            {
+                WindowState = WindowState.Maximized;
+            }
+        }
+
+        private void btnClose_Click(object sender, RoutedEventArgs e)
+        {
+            //Close();
+            System.Windows.Application.Current.Shutdown();
         }
 
         public void Dispose()

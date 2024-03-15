@@ -371,12 +371,13 @@ namespace Dynamo.Tests
         }
     }
 
-    internal class FakeUpdateRenderPackageAsyncTask : UpdateRenderPackageAsyncTask
+    internal class FakeUpdateRenderPackageAsyncTask : UpdateGraphAsyncTask
     {
         private readonly FakeAsyncTaskData data;
+        private Guid nodeGuid;
 
         internal FakeUpdateRenderPackageAsyncTask(FakeAsyncTaskData data)
-            : base(data.Scheduler)
+            : base(data.Scheduler, false)
         {
             this.data = data;
         }

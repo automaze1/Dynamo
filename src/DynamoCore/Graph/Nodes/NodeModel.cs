@@ -2673,30 +2673,6 @@ namespace Dynamo.Graph.Nodes
         public virtual bool RequestVisualUpdateAsync(IScheduler scheduler,
             EngineController engine, IRenderPackageFactory factory, bool forceUpdate, bool ignoreIsVisible = false)
         {
-            var initParams = new UpdateRenderPackageParams()
-            {
-                Node = this,
-                RenderPackageFactory = factory,
-                EngineController = engine,
-                DrawableIdMap = GetDrawableIdMap(),
-                PreviewIdentifierName = AstIdentifierForPreview.Name,
-                ForceUpdate = forceUpdate,
-                IgnoreIsVisible = ignoreIsVisible
-            };
-
-            var task = new UpdateRenderPackageAsyncTask(scheduler);
-            try
-            {
-                if (!task.Initialize(initParams)) return false;
-            }
-            catch (ArgumentNullException e)
-            {
-                Log(e.ToString());
-                return false;
-            }
-
-            task.Completed += OnRenderPackageUpdateCompleted;
-            scheduler.ScheduleForExecution(task);
             return true;
         }
 
@@ -2710,16 +2686,7 @@ namespace Dynamo.Graph.Nodes
         ///
         private void OnRenderPackageUpdateCompleted(AsyncTask asyncTask)
         {
-            var task = asyncTask as UpdateRenderPackageAsyncTask;
-            var packages = new RenderPackageCache();
-
-            if (!task.RenderPackages.IsEmpty())
-            {
-                packages.Add(task.RenderPackages);
-                packages.Add(OnRequestRenderPackages());
-            }
-
-            OnRenderPackagesUpdated(packages);
+            
         }
 
         /// <summary>
