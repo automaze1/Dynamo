@@ -531,13 +531,36 @@ namespace ProtoFFI
             {
                 try
                 {
-                    if (valueType != typeof(object))
+                    var valueAtKey = d.ValueAtKey(key);
+                    var type = valueAtKey.GetType();
+                    if (valueType.IsAssignableFrom(type))
                     {
-                        targetDict[key] = Convert.ChangeType(d.ValueAtKey(key), valueType);
+                        targetDict[key] = Convert.ChangeType(valueAtKey, valueType);
+                    }
+                    else if(valueAtKey is ArrayList)
+                    {
+                        var elementType = valueType.GetElementType() ?? typeof(object);
+                        if (valueType.IsGenericType)
+                        {
+                            elementType = valueType.GetGenericArguments().First();
+                        }
+                        var collection = (valueAtKey as ArrayList).ToArray(elementType);
+                        if (valueType.IsAssignableFrom(collection.GetType()))
+                        {
+                            targetDict[key] = collection;
+                        }
+                        else
+                        {
+                            targetDict[key] = Activator.CreateInstance(valueType, new[] { collection });
+                        }
+                    }
+                    else if (valueType != typeof(object))
+                    {
+                        targetDict[key] = Convert.ChangeType(valueAtKey, valueType);
                     }
                     else
                     {
-                        targetDict[key] = d.ValueAtKey(key);
+                        targetDict[key] = valueAtKey;
                     }
                 }
                 catch (Exception e)
