@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Dynamo.Configuration;
 using Dynamo.Logging;
+using Dynamo.UI.Commands;
 using Dynamo.Utilities;
 using Dynamo.ViewModels;
 using Dynamo.Wpf.Properties;
@@ -53,7 +54,15 @@ namespace Dynamo.UI.Controls
             /// is clicked, StartPageViewModel brings up the default browser and
             /// navigate to the URL indicated by ContextData property.
             /// </summary>
-            ExternalUrl
+            ExternalUrl,
+
+            /// <summary>
+            /// Indicates a delegate command should be invoked if the list view
+            /// item corresponding to this StartPageListItem is clicked. The
+            /// meaning of ContextData will be interpreted in StartPageViewModel
+            /// and corresponding action taken as a result.
+            /// </summary>
+            DelegateCommand
         }
 
         public StartPageListItem(string caption)
@@ -74,6 +83,7 @@ namespace Dynamo.UI.Controls
         public string ToolTip { get; set; }
         public string ContextData { get; set; }
         public Action ClickAction { get; set; }
+        public DelegateCommand DelegateCommand { get; set; }
 
         public ImageSource Icon
         {
@@ -93,6 +103,11 @@ namespace Dynamo.UI.Controls
         private BitmapImage LoadBitmapImage(string iconPath)
         {
             if (File.Exists(iconPath))
+            {
+                var fullpath = Path.GetFullPath(iconPath);
+                return new BitmapImage(new Uri(fullpath, UriKind.Absolute));
+            }
+            if (iconPath.StartsWith(@"pack://application"))
             {
                 return new BitmapImage(new Uri(iconPath, UriKind.Absolute));
             }
@@ -114,7 +129,7 @@ namespace Dynamo.UI.Controls
         string sampleFolderPath = null;
 
         // Dynamic lists that update views on the fly.
-        ObservableCollection<SampleFileEntry> sampleFiles = null;
+        ObservableCollection<StartPageListItem> sampleFiles = null;
         ObservableCollection<StartPageListItem> recentFiles = null;
         ObservableCollection<StartPageListItem> backupFiles = null;
         internal readonly DynamoViewModel DynamoViewModel;
@@ -126,7 +141,7 @@ namespace Dynamo.UI.Controls
             this.isFirstRun = isFirstRun;
 
             this.recentFiles = new ObservableCollection<StartPageListItem>();
-            sampleFiles = new ObservableCollection<SampleFileEntry>();
+            sampleFiles = new ObservableCollection<StartPageListItem>();
             backupFiles = new ObservableCollection<StartPageListItem>();
 
 
@@ -213,6 +228,12 @@ namespace Dynamo.UI.Controls
             RefreshBackupFileList(dvm.Model.PreferenceSettings.BackupFiles);
             dvm.RecentFiles.CollectionChanged += OnRecentFilesChanged;
         }
+
+        internal IEnumerable<string> GetAllDynFiles(DirectoryInfo root)
+        {
+            return root.GetFiles("*.dyn", SearchOption.AllDirectories).Select(f => f.FullName);
+        }
+
         internal void WalkDirectoryTree(System.IO.DirectoryInfo root, SampleFileEntry rootProperty)
         {
             try
@@ -275,6 +296,9 @@ namespace Dynamo.UI.Controls
                     case StartPageListItem.Action.ExternalUrl:
                         HandleExternalUrl(clicked);
                         break;
+                    case StartPageListItem.Action.DelegateCommand:
+                        HandleDelegateCommand(clicked);
+                        break;
                 }
             }
         }
@@ -325,7 +349,7 @@ namespace Dynamo.UI.Controls
 
         #endregion
 
-        public ObservableCollection<SampleFileEntry> SampleFiles
+        public ObservableCollection<StartPageListItem> SampleFiles
         {
             get { return this.sampleFiles; }
         }
@@ -367,7 +391,7 @@ namespace Dynamo.UI.Controls
             RefreshFileList(backupFiles, filePaths);
         }
 
-        private void RefreshFileList(ObservableCollection<StartPageListItem> files,
+        public void RefreshFileList(ObservableCollection<StartPageListItem> files,
             IEnumerable<string> filePaths)
         {
             files.Clear();
@@ -429,6 +453,15 @@ namespace Dynamo.UI.Controls
             }
         }
 
+        private void HandleDelegateCommand(StartPageListItem item)
+        {
+            var cmd = item.DelegateCommand;
+            if(cmd != null && cmd.CanExecute(item))
+            {
+                cmd.Execute(item);
+            }
+        }
+
         private void HandleFilePath(StartPageListItem item)
         {
             var path = item.ContextData;
@@ -481,8 +514,8 @@ namespace Dynamo.UI.Controls
             //this.referenceListBox.ItemsSource = startPageViewModel.References;
             //this.codeListBox.ItemsSource = startPageViewModel.ContributeLinks;
             this.recentListItems.ItemsSource = startPageViewModel.RecentFiles;
+            this.backupFilesList.ItemsSource = startPageViewModel.BackupFiles;
             this.sampleListItems.ItemsSource = startPageViewModel.SampleFiles;
-            //this.backupFilesList.ItemsSource = startPageViewModel.BackupFiles;
 
             var id = Wpf.Interfaces.ResourceNames.StartPage.Image;
             StartPageLogo.Source = dynamoViewModel.BrandingResourceProvider.GetImageSource(id);

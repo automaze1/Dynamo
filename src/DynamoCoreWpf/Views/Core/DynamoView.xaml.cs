@@ -2135,8 +2135,9 @@ namespace Dynamo.Controls
                     var rootPath = Path.GetDirectoryName(firstFilePath);
                     var root = new DirectoryInfo(rootPath);
                     var rootProperty = new SampleFileEntry("Samples", "Path");
-                    startPage.WalkDirectoryTree(root, rootProperty);
-                    startPage.SampleFiles.Add(rootProperty);
+                    //startPage.WalkDirectoryTree(root, rootProperty);
+
+                    startPage.RefreshFileList(startPage.SampleFiles, startPage.GetAllDynFiles(root));
                 }
             }
         }

@@ -6,7 +6,7 @@
              xmlns:l="clr-namespace:Dynamo.UI.Controls"
              xmlns:ui="clr-namespace:Dynamo.UI"
              xmlns:p="clr-namespace:Dynamo.Wpf.Properties"
-             xmlns:configuration="clr-namespace:Dynamo.Configuration;assembly=DynamoCore"
+             xmlns:configuration="clr-namespace:Dynamo.Configuration;assembly=DynamoCore" d:DataContext="{d:DesignInstance Type=l:StartPageViewModel}"
              mc:Ignorable="d"
              d:DesignWidth="640"
              d:DesignHeight="480">
@@ -105,18 +105,22 @@
                 </ListView.ItemsPanel>
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Border Grid.Column="0"
-                                Background="Transparent"
-                                CornerRadius="10"
-                                BorderThickness="1"
-                                BorderBrush="Gray"
-                                MinWidth="300"
-                                Height="125">
-                            <Border.Effect>
-                                <DropShadowEffect Color="DarkGray" Direction="315" ShadowDepth="2" Opacity="0.5"/>
-                            </Border.Effect>
-                            <TextBlock Text="{Binding Caption}" Foreground="SlateGray" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="28" TextWrapping="Wrap"/>
-                        </Border>
+                        <Grid>
+                            <Border Background="Transparent"
+                                    CornerRadius="10"
+                                    BorderThickness="1"
+                                    BorderBrush="Gray"
+                                    MinWidth="300"
+                                    Height="140">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="DarkGray" Direction="315" ShadowDepth="2" Opacity="0.5"/>
+                                </Border.Effect>
+                            </Border>
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                <Image Source="{Binding Icon}" Width="50" Height="50" Stretch="UniformToFill" Margin="5"/>
+                                <TextBlock Text="{Binding Caption}" Foreground="SlateGray" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="28" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
@@ -126,7 +130,8 @@
                HorizontalAlignment="Left" Margin="0,20,0,5"/>
             <Rectangle Height="5" Width="125" HorizontalAlignment="Left" Fill="Orange"/>
             <TabControl Margin="0,10,0,0" BorderThickness="0">
-                <TabItem Style="{StaticResource TabDecorator}" Header="Recent" FontSize="16" BorderThickness="0">
+                <TabItem Style="{StaticResource TabDecorator}" Header="Recent" FontSize="16" BorderThickness="0"
+                         ToolTip="Here are the recent files you have been working on.">
                     <ListView Name="recentListItems" HorizontalAlignment="Stretch" VerticalAlignment="Top"
                               ScrollViewer.HorizontalScrollBarVisibility="Auto"
                               SelectionChanged="OnItemSelectionChanged"
@@ -156,11 +161,42 @@
                         </ListView.ItemTemplate>
                     </ListView>
                 </TabItem>
-                <TabItem Style="{StaticResource TabDecorator}" Header="Samples" FontSize="16" BorderThickness="0">
+                <TabItem Style="{StaticResource TabDecorator}" Header="Samples" FontSize="16" BorderThickness="0"
+                         Visibility="{Binding SampleFiles, Converter={StaticResource ListHasMoreThanNItemsToVisibilityConverter}}"
+                         ToolTip="Here are some sample dataflow from where you can take inspiration for your work.">
                     <ListView Name="sampleListItems" HorizontalAlignment="Stretch" VerticalAlignment="Top"
                               ScrollViewer.HorizontalScrollBarVisibility="Auto"
                               SelectionChanged="OnItemSelectionChanged"
                               BorderThickness="0">
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="5" Orientation="Vertical">
+                                    <StackPanel.ToolTip>
+                                        <Binding Path="ToolTip"/>
+                                    </StackPanel.ToolTip>
+                                    <Border Style="{StaticResource ButtonHighlighter}" Width="100" Height="100" BorderThickness="3,1,1,3" Margin="0,10,0,0">
+                                        <!-- Image -->
+                                        <Image Source="{Binding Icon}" Stretch="UniformToFill"/>
+                                    </Border>
+                                    <!-- Name -->
+                                    <TextBlock Text="{Binding Caption}" Margin="0,5,0,0" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </TabItem>
+                <TabItem Style="{StaticResource TabDecorator}" Header="Backup" FontSize="16" BorderThickness="0"
+                         Visibility="{Binding BackupFiles, Converter={StaticResource ListHasMoreThanNItemsToVisibilityConverter}}"
+                         ToolTip="Here is the backup of the last dataflow that you couldn't save.">
+                    <ListView Name="backupFilesList" HorizontalAlignment="Stretch" VerticalAlignment="Top"
+              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+              SelectionChanged="OnItemSelectionChanged"
+              BorderThickness="0">
                         <ListView.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Horizontal"/>

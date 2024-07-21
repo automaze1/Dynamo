@@ -1171,7 +1171,7 @@ namespace Dynamo.Configuration
         /// </summary>
         /// <param name="path">The path to be added as a trusted location</param>
         /// <returns>True if the path was successfully added. False otherwise.</returns>
-        internal bool AddTrustedLocation(string path)
+        public bool AddTrustedLocation(string path)
         {
             try
             {
