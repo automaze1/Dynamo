@@ -155,7 +155,7 @@
     <value>Place your code below this line</value>
   </data>
   <data name="PythonScriptEditorImports" xml:space="preserve">
-    <value>Load the Python Standard and DesignScript Libraries</value>
+    <value>Load the Python Standard and Factobi Libraries</value>
     <comment>Description for the common import statements that puzzle beginners.</comment>
   </data>
   <data name="PythonScriptEditorInputComment" xml:space="preserve">

@@ -191,8 +191,8 @@ namespace PythonNodeModels
                 return "# " + Properties.Resources.PythonScriptEditorImports + Environment.NewLine +
                         "import sys" + Environment.NewLine +
                         "import clr" + Environment.NewLine +
-                        "clr.AddReference('ProtoGeometry')" + Environment.NewLine +
-                        "from Autodesk.DesignScript.Geometry import *" + Environment.NewLine + Environment.NewLine +
+                        "clr.AddReference('Factobi.Data')" + Environment.NewLine +
+                        "from Factobi.Data import *" + Environment.NewLine + Environment.NewLine +
                         "# " + Properties.Resources.PythonScriptEditorInputComment + Environment.NewLine +
                         "dataEnteringNode = IN" + Environment.NewLine + Environment.NewLine +
                         "# " + Properties.Resources.PythonScriptEditorCodeComment + Environment.NewLine + Environment.NewLine +
