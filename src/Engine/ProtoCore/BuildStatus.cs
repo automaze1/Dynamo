@@ -1,715 +1,715 @@
-usingSystem;
-usingSystem.Collections.Generic;
-usingSystem.IO;
-usingProtoCore.BuildData;
-usingProtoCore.DSASM;
-usingProtoCore.Properties;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using ProtoCore.BuildData;
+using ProtoCore.DSASM;
+using ProtoCore.Properties;
 
-namespaceProtoCore
+namespace ProtoCore
 {
-publicclassBuildHaltException:Exception
-{
-publicstringErrorMessage
-{
-get;privateset;
-}
+    public class BuildHaltException : Exception
+    {
+        public string ErrorMessage
+        {
+            get; private set;
+        }
 
-publicBuildHaltException(stringmessage)
-{
-ErrorMessage=message+'\n';
-}
-}
+        public BuildHaltException(string message)
+        {
+            ErrorMessage = message + '\n';
+        }
+    }
 
-namespaceBuildData
-{
-publicenumErrorType
-{
-SyntaxError,
-SemanticError,
-MaxErrorID
-}
+    namespace BuildData
+    {
+        public enum ErrorType
+        {
+            SyntaxError,
+            SemanticError,
+            MaxErrorID
+        }
 
-publicenumWarningID
-{
-AccessViolation,
-CallingConstructorInConstructor,
-CallingConstructorOnInstance,
-CallingNonStaticMethodOnClass,
-FunctionAbnormalExit,
-FunctionAlreadyDefined,
-FunctionNotFound,
-IdUnboundIdentifier,
-InvalidStaticCyclicDependency,
-InvalidRangeExpression,
-InvalidThis,
-MissingReturnStatement,
-Parsing,
-TypeUndefined,
-PropertyNotFound,
-FileNotFound,
-MultipleSymbolFound,
-MultipleSymbolFoundFromName,
-}
+        public enum WarningID
+        {
+            AccessViolation,
+            CallingConstructorInConstructor,
+            CallingConstructorOnInstance,
+            CallingNonStaticMethodOnClass,
+            FunctionAbnormalExit,
+            FunctionAlreadyDefined,
+            FunctionNotFound,
+            IdUnboundIdentifier,
+            InvalidStaticCyclicDependency,
+            InvalidRangeExpression,
+            InvalidThis,
+            MissingReturnStatement,
+            Parsing,
+            TypeUndefined,
+            PropertyNotFound,
+            FileNotFound,
+            MultipleSymbolFound,
+            MultipleSymbolFoundFromName,
+        }
 
-publicstructErrorEntry
-{
-publicErrorTypeID;
-publicstringFileName;
-publicstringMessage;
-publicintLine;
-publicintColumn;
-}
+        public struct ErrorEntry
+        {
+            public ErrorType ID;
+            public string FileName;
+            public string Message;
+            public int Line;
+            public int Column;
+        }
 
-publicstructWarningEntry
-{
-publicWarningIDID;
-publicstringMessage;
-publicintLine;
-publicintColumn;
-publicGuidGraphNodeGuid;
-publicintAstID;
-publicstringFileName;
-publicSymbolNodeUnboundVariableSymbolNode;
-}
-}
+        public struct WarningEntry
+        {
+            public WarningID ID;
+            public string Message;
+            public int Line;
+            public int Column;
+            public Guid GraphNodeGuid;
+            public int AstID;
+            public string FileName;
+            public SymbolNode UnboundVariableSymbolNode;
+        }
+    }
 
-///<summary>
-///VMprintoutmessage
-///</summary>
-publicclassOutputMessage
-{
-publicenumMessageType{Info,Warning,Error}
-//Aconstructorformessageonlyforprint-outpurpose
-publicOutputMessage(stringmessage)
-{
-Type=MessageType.Info;
-Message=message;
-FilePath=string.Empty;
-Line=-1;
-Column=-1;
-}
+    /// <summary>
+    /// VM print out message
+    /// </summary>
+    public class OutputMessage
+    {
+        public enum MessageType { Info, Warning, Error }
+        // A constructor for message only for print-out purpose
+        public OutputMessage(string message)
+        {
+            Type = MessageType.Info;
+            Message = message;
+            FilePath = string.Empty;
+            Line = -1;
+            Column = -1;
+        }
 
-//Aconstructorforsourcelocationrelatedmessages.
-publicOutputMessage(MessageTypetype,stringmessage,
-stringfilePath,intline,intcolumn)
-{
-Type=type;
-Message=message;
-FilePath=filePath;
-Line=line;
-Column=column;
-}
+        // A constructor for source location related messages.
+        public OutputMessage(MessageType type, string message,
+            string filePath, int line, int column)
+        {
+            Type = type;
+            Message = message;
+            FilePath = filePath;
+            Line = line;
+            Column = column;
+        }
 
-//Aconstructorforinfomessageswithoutlineandcolume.
-internalOutputMessage(MessageTypetype,stringmessage,stringfilePath)
-{
-Type=type;
-Message=message;
-FilePath=filePath;
-Line=-1;
-Column=-1;
-}
+        // A constructor for info messages without line and colume.
+        internal OutputMessage(MessageType type, string message, string filePath)
+        {
+            Type = type;
+            Message = message;
+            FilePath = filePath;
+            Line = -1;
+            Column = -1;
+        }
 
-publicMessageTypeType{get;privateset;}
-publicstringFilePath{get;privateset;}
-publicintLine{get;privateset;}
-publicintColumn{get;privateset;}
-publicstringMessage{get;privateset;}
-publicboolContinue{get;set;}
-}
+        public MessageType Type { get; private set; }
+        public string FilePath { get; private set; }
+        public int Line { get; private set; }
+        public int Column { get; private set; }
+        public string Message { get; private set; }
+        public bool Continue { get; set; }
+    }
 
-publicinterfaceIOutputStream
-{
-voidWrite(OutputMessagemessage);
-}
+    public interface IOutputStream
+    {
+        void Write(OutputMessage message);
+    }
 
-publicclassTextOutputStream:IOutputStream
-{
-publicStringWriterTextStream{get;privateset;}
-publicDictionary<int,List<string>>Map{get;privateset;}
+    public class TextOutputStream : IOutputStream
+    {
+        public StringWriter TextStream { get; private set; }
+        public Dictionary<int, List<string>> Map { get; private set; }
 
-publicTextOutputStream(Dictionary<int,List<string>>map)
-{
-TextStream=newStringWriter();
-Map=map;
-}
+        public TextOutputStream(Dictionary<int, List<string>> map)
+        {
+            TextStream = new StringWriter();
+            Map = map;
+        }
 
-publicvoidWrite(ProtoCore.OutputMessagemessage)
-{
-if(null==message)
-return;
+        public void Write(ProtoCore.OutputMessage message)
+        {
+            if (null == message)
+                return;
 
-if(string.IsNullOrEmpty(message.FilePath))
-{
-//Type:Message
-stringformatWithoutFile="{0}:{1}";
-TextStream.WriteLine(string.Format(formatWithoutFile,
-message.Type.ToString(),message.Message));
-}
-else
-{
-//Type:Message(File-Line,Column)
-stringformatWithFile="{0}:{1}({2}-line:{3},col:{4})";
-TextStream.WriteLine(string.Format(formatWithFile,
-message.Type.ToString(),message.Message,
-message.FilePath,message.Line,message.Column));
-}
+            if (string.IsNullOrEmpty(message.FilePath))
+            {
+                // Type: Message
+                string formatWithoutFile = "{0}: {1}";
+                TextStream.WriteLine(string.Format(formatWithoutFile,
+                    message.Type.ToString(), message.Message));
+            }
+            else
+            {
+                // Type: Message (File - Line, Column)
+                string formatWithFile = "{0}: {1} ({2} - line: {3}, col: {4})";
+                TextStream.WriteLine(string.Format(formatWithFile,
+                    message.Type.ToString(), message.Message,
+                    message.FilePath, message.Line, message.Column));
+            }
 
-if(message.Type==ProtoCore.OutputMessage.MessageType.Warning)
-message.Continue=true;
-}
-}
+            if (message.Type == ProtoCore.OutputMessage.MessageType.Warning)
+                message.Continue = true;
+        }
+    }
 
-publicclassConsoleOutputStream:IOutputStream
-{
-publicConsoleOutputStream()
-{
-}
+    public class ConsoleOutputStream : IOutputStream
+    {
+        public ConsoleOutputStream()
+        {
+        }
 
-publicvoidWrite(ProtoCore.OutputMessagemessage)
-{
-if(null==message)
-return;
+        public void Write(ProtoCore.OutputMessage message)
+        {
+            if (null == message)
+                return;
 
-#ifDEBUG
-if(string.IsNullOrEmpty(message.FilePath))
-{
-//Type:Message
-stringformatWithoutFile="{0}:{1}";
-System.Console.WriteLine(string.Format(formatWithoutFile,
-message.Type.ToString(),message.Message));
-}
-else
-{
-//Type:Message(File-Line,Column)
-stringformatWithFile="{0}:{1}({2}-line:{3},col:{4})";
-System.Console.WriteLine(string.Format(formatWithFile,
-message.Type.ToString(),message.Message,
-message.FilePath,message.Line,message.Column));
-}
+#if DEBUG
+            if (string.IsNullOrEmpty(message.FilePath))
+            {
+                // Type: Message
+                string formatWithoutFile = "{0}: {1}";
+                System.Console.WriteLine(string.Format(formatWithoutFile,
+                    message.Type.ToString(), message.Message));
+            }
+            else
+            {
+                // Type: Message (File - Line, Column)
+                string formatWithFile = "{0}: {1} ({2} - line: {3}, col: {4})";
+                System.Console.WriteLine(string.Format(formatWithFile,
+                    message.Type.ToString(), message.Message,
+                    message.FilePath, message.Line, message.Column));
+            }
 #endif
 
-if(message.Type==ProtoCore.OutputMessage.MessageType.Warning)
-message.Continue=true;
-}
-}
+            if (message.Type == ProtoCore.OutputMessage.MessageType.Warning)
+                message.Continue = true;
+        }
+    }
 
-publicclassBuildStatus
-{
-privateProtoCore.Corecore;
-privateSystem.IO.TextWriterconsoleOut=System.Console.Out;
-privatereadonlyboolLogWarnings=true;
-privatereadonlyboollogErrors=true;
-privatereadonlybooldisplayBuildResult=true;
+    public class BuildStatus
+    {
+        private ProtoCore.Core core;
+        private System.IO.TextWriter consoleOut = System.Console.Out;
+        private readonly bool LogWarnings = true;
+        private readonly bool logErrors = true;
+        private readonly bool displayBuildResult = true;
 
-publicIOutputStreamMessageHandler{get;set;}
+        public IOutputStream MessageHandler { get; set; }
 
-privateList<BuildData.WarningEntry>warnings;
-publicIEnumerable<BuildData.WarningEntry>Warnings
-{
-get
-{
-returnwarnings;
-}
-}
+        private List<BuildData.WarningEntry> warnings;
+        public IEnumerable<BuildData.WarningEntry> Warnings
+        {
+            get
+            {
+                return warnings;
+            }
+        }
 
-publicintWarningCount
-{
-get{returnwarnings.Count;}
-}
+        public int WarningCount
+        {
+            get { return warnings.Count; }
+        }
 
-privatereadonlyList<BuildData.ErrorEntry>errors;
-publicIEnumerable<BuildData.ErrorEntry>Errors
-{
-get
-{
-returnerrors;
-}
-}
+        private readonly List<BuildData.ErrorEntry> errors;
+        public IEnumerable<BuildData.ErrorEntry> Errors
+        {
+            get
+            {
+                return errors;
+            }
+        }
 
-publicintErrorCount
-{
-get{returnerrors.Count;}
-}
+        public int ErrorCount
+        {
+            get { return errors.Count; }
+        }
 
-publicboolBuildSucceeded
-{
-get
-{
-returnErrorCount==0;
-}
-}
+        public bool BuildSucceeded
+        {
+            get
+            {
+                return ErrorCount == 0;
+            }
+        }
 
-//logsallerrorsandwarningsbydefault
-//
-publicBuildStatus(Corecore,System.IO.TextWriterwriter=null,boolerrorAsWarning=false)
-{
-this.core=core;
-warnings=newList<BuildData.WarningEntry>();
-errors=newList<BuildData.ErrorEntry>();
+        //  logs all errors and warnings by default
+        //
+        public BuildStatus(Core core, System.IO.TextWriter writer = null, bool errorAsWarning = false)
+        {
+            this.core = core;
+            warnings = new List<BuildData.WarningEntry>();
+            errors = new List<BuildData.ErrorEntry>();
 
-if(writer!=null)
-{
-consoleOut=System.Console.Out;
-System.Console.SetOut(writer);
-}
+            if (writer != null)
+            {
+                consoleOut = System.Console.Out;
+                System.Console.SetOut(writer);
+            }
 
-//Createadefaultconsoleoutputstream,andthiscan
-//beoverwritteninIDEbyassigningitadifferentvalue.
-this.MessageHandler=newConsoleOutputStream();
-displayBuildResult=logErrors=LogWarnings=core.Options.Verbose;
-}
+            // Create a default console output stream, and this can 
+            // be overwritten in IDE by assigning it a different value.
+            this.MessageHandler = new ConsoleOutputStream();
+            displayBuildResult = logErrors = LogWarnings = core.Options.Verbose;
+        }
 
-///<summary>
-///RemoveunboundvariablewarningsthatmatchallsymbolsinthesymbolList
-///</summary>
-///<paramname="symbolList"></param>
-publicvoidRemoveUnboundVariableWarnings(HashSet<SymbolNode>symbolList)
-{
-foreach(SymbolNodesymbolinsymbolList)
-{
-//Removeallwarningsthatmatchthesymbol
-warnings.RemoveAll(w=>w.ID==BuildData.WarningID.IdUnboundIdentifier&&w.UnboundVariableSymbolNode!=null&&w.UnboundVariableSymbolNode.Equals(symbol));
-}
-}
+        /// <summary>
+        /// Remove unbound variable warnings that match all symbols in the symbolList
+        /// </summary>
+        /// <param name="symbolList"></param>
+        public void RemoveUnboundVariableWarnings(HashSet<SymbolNode> symbolList)
+        {
+            foreach (SymbolNode symbol in symbolList)
+            {
+                // Remove all warnings that match the symbol
+                warnings.RemoveAll(w => w.ID == BuildData.WarningID.IdUnboundIdentifier && w.UnboundVariableSymbolNode != null && w.UnboundVariableSymbolNode.Equals(symbol));
+            }
+        }
 
-publicvoidClearWarnings()
-{
-warnings.Clear();
-}
+        public void ClearWarnings()
+        {
+            warnings.Clear();
+        }
 
-publicvoidClearWarningsForAst(intastID)
-{
-warnings.RemoveAll(w=>w.AstID.Equals(astID));
-}
+        public void ClearWarningsForAst(int astID)
+        {
+            warnings.RemoveAll(w => w.AstID.Equals(astID));
+        }
 
-publicvoidClearWarningsForGraph(Guidguid)
-{
-warnings.RemoveAll(w=>w.GraphNodeGuid.Equals(guid));
-}
+        public void ClearWarningsForGraph(Guid guid)
+        {
+            warnings.RemoveAll(w => w.GraphNodeGuid.Equals(guid));
+        }
 
-publicvoidClearErrors()
-{
-errors.Clear();
-}
+        public void ClearErrors()
+        {
+            errors.Clear();
+        }
 
-publicvoidLogSyntaxError(stringmsg,stringfileName=null,intline=-1,intcol=-1)
-{
-varlocalizedMessage=LocalizeErrorMessage(msg);
+        public void LogSyntaxError(string msg, string fileName = null, int line = -1, int col = -1)
+        {
+            var localizedMessage = LocalizeErrorMessage(msg);
 
-#ifDEBUG
-if(logErrors)
-{
-varmessage=string.Format("{0}({1},{2})Error:{3}",fileName,line,col,localizedMessage);
-System.Console.WriteLine(message);
-}
+#if DEBUG
+            if (logErrors)
+            {
+                var message = string.Format("{0}({1},{2}) Error:{3}", fileName, line, col, localizedMessage);
+                System.Console.WriteLine(message);
+            }
 #endif
 
-varerrorEntry=newBuildData.ErrorEntry
-{
-ID=BuildData.ErrorType.SyntaxError,
-FileName=fileName,
-Message=localizedMessage,
-Line=line,
-Column=col
-};
+            var errorEntry = new BuildData.ErrorEntry
+            {
+                ID = BuildData.ErrorType.SyntaxError,
+                FileName = fileName,
+                Message = localizedMessage,
+                Line = line,
+                Column = col
+            };
 
-if(core.Options.IsDeltaExecution)
-{
-}
+            if (core.Options.IsDeltaExecution)
+            {
+            }
 
-errors.Add(errorEntry);
-
-
-OutputMessageoutputmessage=newOutputMessage(OutputMessage.MessageType.Error,localizedMessage.Trim(),fileName,line,col);
+            errors.Add(errorEntry);
 
 
-if(MessageHandler!=null)
-{
-MessageHandler.Write(outputmessage);
-if(!outputmessage.Continue)
-thrownewBuildHaltException(localizedMessage);
-}
-}
-
-privatestringLocalizeErrorMessage(stringerrorMessage)
-{
-switch(errorMessage)
-{
-case"EOFexpected":
-returnProperties.Resources.EOF_expected;
-case"identexpected":
-returnProperties.Resources.ident_expected;
-case"numberexpected":
-returnProperties.Resources.number_expected;
-case"floatexpected":
-returnProperties.Resources.float_expected;
-case"textstringexpected":
-returnProperties.Resources.textstring_expected;
-case"charexpected":
-returnProperties.Resources.char_expected;
-case"periodexpected":
-returnProperties.Resources.period_expected;
-case"postfixed_replicationguideexpected":
-returnProperties.Resources.postfixed_replicationguide_expected;
-case"openbracketexpected":
-returnProperties.Resources.openbracket_expected;
-case"closebracketexpected":
-returnProperties.Resources.closebracket_expected;
-case"openparenexpected":
-returnProperties.Resources.openparen_expected;
-case"closeparenexpected":
-returnProperties.Resources.closeparen_expected;
-case"notexpected":
-returnProperties.Resources.not_expected;
-case"negexpected":
-returnProperties.Resources.neg_expected;
-case"pipeexpected":
-returnProperties.Resources.pipe_expected;
-case"lessthanexpected":
-returnProperties.Resources.lessthan_expected;
-case"greaterthanexpected":
-returnProperties.Resources.greaterthan_expected;
-case"lessequalexpected":
-returnProperties.Resources.lessequal_expected;
-case"greaterequalexpected":
-returnProperties.Resources.greaterequal_expected;
-case"equalexpected":
-returnProperties.Resources.equal_expected;
-case"notequalexpected":
-returnProperties.Resources.notequal_expected;
-case"endlineexpected":
-returnProperties.Resources.endline_expected;
-case"rangeopexpected":
-returnProperties.Resources.rangeop_expected;
-case"kw_nativeexpected":
-returnProperties.Resources.kw_native_expected;
-case"kw_classexpected":
-returnProperties.Resources.kw_class_expected;
-case"kw_constructorexpected":
-returnProperties.Resources.kw_constructor_expected;
-case"kw_defexpected":
-returnProperties.Resources.kw_def_expected;
-case"kw_externalexpected":
-returnProperties.Resources.kw_external_expected;
-case"kw_extendexpected":
-returnProperties.Resources.kw_extend_expected;
-case"kw_heapexpected":
-returnProperties.Resources.kw_heap_expected;
-case"kw_ifexpected":
-returnProperties.Resources.kw_if_expected;
-case"kw_elseifexpected":
-returnProperties.Resources.kw_elseif_expected;
-case"kw_elseexpected":
-returnProperties.Resources.kw_else_expected;
-case"kw_whileexpected":
-returnProperties.Resources.kw_while_expected;
-case"kw_forexpected":
-returnProperties.Resources.kw_for_expected;
-case"kw_importexpected":
-returnProperties.Resources.kw_import_expected;
-case"kw_prefixexpected":
-returnProperties.Resources.kw_prefix_expected;
-case"kw_fromexpected":
-returnProperties.Resources.kw_from_expected;
-case"kw_breakexpected":
-returnProperties.Resources.kw_break_expected;
-case"kw_continueexpected":
-returnProperties.Resources.kw_continue_expected;
-case"kw_staticexpected":
-returnProperties.Resources.kw_static_expected;
-case"kw_localexpected":
-returnProperties.Resources.kw_local_expected;
-case"literal_trueexpected":
-returnProperties.Resources.literal_true_expected;
-case"literal_falseexpected":
-returnProperties.Resources.literal_false_expected;
-case"literal_nullexpected":
-returnProperties.Resources.literal_null_expected;
-case"replicationguide_postfixexpected":
-returnProperties.Resources.replicationguide_postfix_expected;
-case"\"throw\"expected":
-returnProperties.Resources.throw_expected;
-case"\"{\"expected":
-returnProperties.Resources.openbrace_expected;
-case"\"}\"expected":
-returnProperties.Resources.closebrace_expected;
-case"\",\"expected":
-returnProperties.Resources.comma_expected;
-case"\"=\"expected":
-returnProperties.Resources.equalmark_expected;
-case"\":\"expected":
-returnProperties.Resources.doublecolumn_expected;
-case"\"public\"expected":
-returnProperties.Resources.public_expected;
-case"\"private\"expected":
-returnProperties.Resources.private_expected;
-case"\"protected\"expected":
-returnProperties.Resources.protected_expected;
-case"\"=>\"expected":
-returnProperties.Resources.equalright_expected;
-case"\"?\"expected":
-returnProperties.Resources.question_expected;
-case"\"try\"expected":
-returnProperties.Resources.try_expected;
-case"\"catch\"expected":
-returnProperties.Resources.catch_expected;
-case"\"+\"expected":
-returnProperties.Resources.add_expected;
-case"\"*\"expected":
-returnProperties.Resources.asterisk_expected;
-case"\"/\"expected":
-returnProperties.Resources.divider_expected;
-case"\"%\"expected":
-returnProperties.Resources.reminder_expected;
-case"\"&\"expected":
-returnProperties.Resources.and_expected;
-case"\"^\"expected":
-returnProperties.Resources.power_expected;
-case"\"&&\"expected":
-returnProperties.Resources.andand_expected;
-case"\"||\"expected":
-returnProperties.Resources.oror_expected;
-case"\"~\"expected":
-returnProperties.Resources.curvedash_expected;
-case"\"++\"expected":
-returnProperties.Resources.addadd_expected;
-case"\"--\"expected":
-returnProperties.Resources.dashdash_expected;
-case"\"#\"expected":
-returnProperties.Resources.hax_expected;
-case"\"in\"expected":
-returnProperties.Resources.in_expected;
-case"???expected":
-returnProperties.Resources.triquestionmark_expected;
-case"';'isexpected":
-returnProperties.Resources.SemiColonExpected;
-case"invalidHydrogen":
-returnProperties.Resources.invalid_Hydrogen;
-case"thissymbolnotexpectedinImport_Statement":
-returnProperties.Resources.this_symbol_not_expected_in_Import_Statement;
-case"invalidImport_Statement":
-returnProperties.Resources.invalid_Import_Statement;
-case"thissymbolnotexpectedinAssociative_Statement":
-returnProperties.Resources.this_symbol_not_expected_in_Associative_Statement;
-case"invalidAssociative_Statement":
-returnProperties.Resources.invalid_Associative_Statement;
-case"invalidAssociative_functiondecl":
-returnProperties.Resources.invalid_Associative_functiondecl;
-case"invalidAssociative_classdecl":
-returnProperties.Resources.invalid_Associative_classdecl;
-case"thissymbolnotexpectedinAssociative_NonAssignmentStatement":
-returnProperties.Resources.this_symbo_no_expected_in_Associative_NonAssignmentStatement;
-case"thissymbolnotexpectedinAssociative_FunctionCallStatement":
-returnProperties.Resources.this_symbol_not_expected_in_Associative_FunctionCallStatement;
-case"thissymbolnotexpectedinAssociative_FunctionalStatement":
-returnProperties.Resources.this_symbol_not_expected_in_Associative_FunctionalStatement;
-case"invalidAssociative_FunctionalStatement":
-returnProperties.Resources.invalid_Associative_FunctionalStatement;
-case"invalidAssociative_LanguageBlock":
-returnProperties.Resources.invalid_Associative_FunctionalStatement;
-case"invalidAssociative_AccessSpecifier":
-returnProperties.Resources.invalid_Associative_AccessSpecifier;
-case"invalidAssociative_BinaryOps":
-returnProperties.Resources.invalid_Associative_BinaryOps;
-case"invalidAssociative_AddOp":
-returnProperties.Resources.invalid_Associative_AddOp;
-case"invalidAssociative_MulOp":
-returnProperties.Resources.invalid_Associative_MulOp;
-case"invalidAssociative_ComparisonOp":
-returnProperties.Resources.invalid_Associative_ComparisonOp;
-case"invalidAssociative_LogicalOp":
-returnProperties.Resources.invalid_Associative_LogicalOp;
-case"invalidAssociative_DecoratedIdentifier":
-returnProperties.Resources.invalid_Associative_DecoratedIdentifier;
-case"invalidAssociative_UnaryExpression":
-returnProperties.Resources.invalid_Associative_UnaryExpression;
-case"invalidAssociative_unaryop":
-returnProperties.Resources.invalid_Associative_unaryop;
-case"invalidAssociative_Factor":
-returnProperties.Resources.invalid_Associative_Factor;
-case"invalidAssociative_negop":
-returnProperties.Resources.invalid_Associative_negop;
-case"invalidAssociative_BitOp":
-returnProperties.Resources.invalid_Associative_BitOp;
-case"invalidAssociative_PostFixOp":
-returnProperties.Resources.invalid_Associative_PostFixOp;
-case"invalidAssociative_Number":
-returnProperties.Resources.invalid_Associative_Number;
-case"invalidAssociative_Level":
-returnProperties.Resources.invalid_Associative_Level;
-case"invalidAssociative_NameReference":
-returnProperties.Resources.invalid_Associative_NameReference;
-case"invalidImperative_stmt":
-returnProperties.Resources.invalid_Imperative_stmt;
-case"invalidImperative_functiondecl":
-returnProperties.Resources.invalid_Imperative_functiondecl;
-case"invalidImperative_languageblock":
-returnProperties.Resources.invalid_Imperative_languageblock;
-case"invalidImperative_ifstmt":
-returnProperties.Resources.invalid_Imperative_ifstmt;
-case"invalidImperative_forloop":
-returnProperties.Resources.invalid_Imperative_forloop;
-case"invalidImperative_assignstmt":
-returnProperties.Resources.invalid_Imperative_assignstmt;
-case"invalidImperative_decoratedIdentifier":
-returnProperties.Resources.invalid_Imperative_decoratedIdentifier;
-case"invalidImperative_NameReference":
-returnProperties.Resources.invalid_Imperative_NameReference;
-case"invalidImperative_unaryexpr":
-returnProperties.Resources.invalid_Imperative_unaryexpr;
-case"invalidImperative_unaryop":
-returnProperties.Resources.invalid_Imperative_unaryexpr;
-case"invalidImperative_factor":
-returnProperties.Resources.invalid_Imperative_factor;
-case"invalidImperative_logicalop":
-returnProperties.Resources.invalid_Imperative_logicalop;
-case"invalidImperative_relop":
-returnProperties.Resources.invalid_Imperative_relop;
-case"invalidImperative_addop":
-returnProperties.Resources.invalid_Imperative_addop;
-case"invalidImperative_mulop":
-returnProperties.Resources.invalid_Imperative_mulop;
-case"invalidImperative_bitop":
-returnProperties.Resources.invalid_Imperative_bitop;
-case"invalidImperative_num":
-returnProperties.Resources.invalid_Imperative_num;
-case"invalidImperative_PostFixOp":
-returnProperties.Resources.invalid_Imperative_PostFixOp;
-default:
-returnerrorMessage;
-}
-}
+            OutputMessage outputmessage = new OutputMessage(OutputMessage.MessageType.Error, localizedMessage.Trim(), fileName, line, col);
 
 
-publicvoidLogSemanticError(stringmsg,stringfileName=null,intline=-1,intcol=-1,AssociativeGraph.GraphNodegraphNode=null)
-{
-#ifDEBUG
-if(logErrors)
-{
-System.Console.WriteLine("{0}({1},{2})Error:{3}",fileName,line,col,msg);
-}
+            if (MessageHandler != null)
+            {
+                MessageHandler.Write(outputmessage);
+                if (!outputmessage.Continue)
+                    throw new BuildHaltException(localizedMessage);
+            }
+        }
+
+        private string LocalizeErrorMessage(string errorMessage)
+        {
+            switch (errorMessage)
+            {
+                case "EOF expected":
+                    return Properties.Resources.EOF_expected;
+                case "ident expected":
+                    return Properties.Resources.ident_expected;
+                case "number expected":
+                    return Properties.Resources.number_expected;
+                case "float expected":
+                    return Properties.Resources.float_expected;
+                case "textstring expected":
+                    return Properties.Resources.textstring_expected;
+                case "char expected":
+                    return Properties.Resources.char_expected;
+                case "period expected":
+                    return Properties.Resources.period_expected;
+                case "postfixed_replicationguide expected":
+                    return Properties.Resources.postfixed_replicationguide_expected;
+                case "openbracket expected":
+                    return Properties.Resources.openbracket_expected;
+                case "closebracket expected":
+                    return Properties.Resources.closebracket_expected;
+                case "openparen expected":
+                    return Properties.Resources.openparen_expected;
+                case "closeparen expected":
+                    return Properties.Resources.closeparen_expected;
+                case "not expected":
+                    return Properties.Resources.not_expected;
+                case "neg expected":
+                    return Properties.Resources.neg_expected;
+                case "pipe expected":
+                    return Properties.Resources.pipe_expected;
+                case "lessthan expected":
+                    return Properties.Resources.lessthan_expected;
+                case "greaterthan expected":
+                    return Properties.Resources.greaterthan_expected;
+                case "lessequal expected":
+                    return Properties.Resources.lessequal_expected;
+                case "greaterequal expected":
+                    return Properties.Resources.greaterequal_expected;
+                case "equal expected":
+                    return Properties.Resources.equal_expected;
+                case "notequal expected":
+                    return Properties.Resources.notequal_expected;
+                case "endline expected":
+                    return Properties.Resources.endline_expected;
+                case "rangeop expected":
+                    return Properties.Resources.rangeop_expected;
+                case "kw_native expected":
+                    return Properties.Resources.kw_native_expected;
+                case "kw_class expected":
+                    return Properties.Resources.kw_class_expected;
+                case "kw_constructor expected":
+                    return Properties.Resources.kw_constructor_expected;
+                case "kw_def expected":
+                    return Properties.Resources.kw_def_expected;
+                case "kw_external expected":
+                    return Properties.Resources.kw_external_expected;
+                case "kw_extend expected":
+                    return Properties.Resources.kw_extend_expected;
+                case "kw_heap expected":
+                    return Properties.Resources.kw_heap_expected;
+                case "kw_if expected":
+                    return Properties.Resources.kw_if_expected;
+                case "kw_elseif expected":
+                    return Properties.Resources.kw_elseif_expected;
+                case "kw_else expected":
+                    return Properties.Resources.kw_else_expected;
+                case "kw_while expected":
+                    return Properties.Resources.kw_while_expected;
+                case "kw_for expected":
+                    return Properties.Resources.kw_for_expected;
+                case "kw_import expected":
+                    return Properties.Resources.kw_import_expected;
+                case "kw_prefix expected":
+                    return Properties.Resources.kw_prefix_expected;
+                case "kw_from expected":
+                    return Properties.Resources.kw_from_expected;
+                case "kw_break expected":
+                    return Properties.Resources.kw_break_expected;
+                case "kw_continue expected":
+                    return Properties.Resources.kw_continue_expected;
+                case "kw_static expected":
+                    return Properties.Resources.kw_static_expected;
+                case "kw_local expected":
+                    return Properties.Resources.kw_local_expected;
+                case "literal_true expected":
+                    return Properties.Resources.literal_true_expected;
+                case "literal_false expected":
+                    return Properties.Resources.literal_false_expected;
+                case "literal_null expected":
+                    return Properties.Resources.literal_null_expected;
+                case "replicationguide_postfix expected":
+                    return Properties.Resources.replicationguide_postfix_expected;
+                case "\"throw\" expected":
+                    return Properties.Resources.throw_expected;
+                case "\"{\" expected":
+                    return Properties.Resources.openbrace_expected;
+                case "\"}\" expected":
+                    return Properties.Resources.closebrace_expected;
+                case "\",\" expected":
+                    return Properties.Resources.comma_expected;
+                case "\"=\" expected":
+                    return Properties.Resources.equalmark_expected;
+                case "\":\" expected":
+                    return Properties.Resources.doublecolumn_expected;
+                case "\"public\" expected":
+                    return Properties.Resources.public_expected;
+                case "\"private\" expected":
+                    return Properties.Resources.private_expected;
+                case "\"protected\" expected":
+                    return Properties.Resources.protected_expected;
+                case "\"=>\" expected":
+                    return Properties.Resources.equalright_expected;
+                case "\"?\" expected":
+                    return Properties.Resources.question_expected;
+                case "\"try\" expected":
+                    return Properties.Resources.try_expected;
+                case "\"catch\" expected":
+                    return Properties.Resources.catch_expected;
+                case "\"+\" expected":
+                    return Properties.Resources.add_expected;
+                case "\"*\" expected":
+                    return Properties.Resources.asterisk_expected;
+                case "\"/\" expected":
+                    return Properties.Resources.divider_expected;
+                case "\"%\" expected":
+                    return Properties.Resources.reminder_expected;
+                case "\"&\" expected":
+                    return Properties.Resources.and_expected;
+                case "\"^\" expected":
+                    return Properties.Resources.power_expected;
+                case "\"&&\" expected":
+                    return Properties.Resources.andand_expected;
+                case "\"||\" expected":
+                    return Properties.Resources.oror_expected;
+                case "\"~\" expected":
+                    return Properties.Resources.curvedash_expected;
+                case "\"++\" expected":
+                    return Properties.Resources.addadd_expected;
+                case "\"--\" expected":
+                    return Properties.Resources.dashdash_expected;
+                case "\"#\" expected":
+                    return Properties.Resources.hax_expected;
+                case "\"in\" expected":
+                    return Properties.Resources.in_expected;
+                case "??? expected":
+                    return Properties.Resources.triquestionmark_expected;
+                case "';' is expected":
+                    return Properties.Resources.SemiColonExpected;
+                case "invalid Hydrogen":
+                    return Properties.Resources.invalid_Hydrogen;
+                case "this symbol not expected in Import_Statement":
+                    return Properties.Resources.this_symbol_not_expected_in_Import_Statement;
+                case "invalid Import_Statement":
+                    return Properties.Resources.invalid_Import_Statement;
+                case "this symbol not expected in Associative_Statement":
+                    return Properties.Resources.this_symbol_not_expected_in_Associative_Statement;
+                case "invalid Associative_Statement":
+                    return Properties.Resources.invalid_Associative_Statement;
+                case "invalid Associative_functiondecl":
+                    return Properties.Resources.invalid_Associative_functiondecl;
+                case "invalid Associative_classdecl":
+                    return Properties.Resources.invalid_Associative_classdecl;
+                case "this symbol not expected in Associative_NonAssignmentStatement":
+                    return Properties.Resources.this_symbo_no_expected_in_Associative_NonAssignmentStatement;
+                case "this symbol not expected in Associative_FunctionCallStatement":
+                    return Properties.Resources.this_symbol_not_expected_in_Associative_FunctionCallStatement;
+                case "this symbol not expected in Associative_FunctionalStatement":
+                    return Properties.Resources.this_symbol_not_expected_in_Associative_FunctionalStatement;
+                case "invalid Associative_FunctionalStatement":
+                    return Properties.Resources.invalid_Associative_FunctionalStatement;
+                case "invalid Associative_LanguageBlock":
+                    return Properties.Resources.invalid_Associative_FunctionalStatement;
+                case "invalid Associative_AccessSpecifier":
+                    return Properties.Resources.invalid_Associative_AccessSpecifier;
+                case "invalid Associative_BinaryOps":
+                    return Properties.Resources.invalid_Associative_BinaryOps;
+                case "invalid Associative_AddOp":
+                    return Properties.Resources.invalid_Associative_AddOp;
+                case "invalid Associative_MulOp":
+                    return Properties.Resources.invalid_Associative_MulOp;
+                case "invalid Associative_ComparisonOp":
+                    return Properties.Resources.invalid_Associative_ComparisonOp;
+                case "invalid Associative_LogicalOp":
+                    return Properties.Resources.invalid_Associative_LogicalOp;
+                case "invalid Associative_DecoratedIdentifier":
+                    return Properties.Resources.invalid_Associative_DecoratedIdentifier;
+                case "invalid Associative_UnaryExpression":
+                    return Properties.Resources.invalid_Associative_UnaryExpression;
+                case "invalid Associative_unaryop":
+                    return Properties.Resources.invalid_Associative_unaryop;
+                case "invalid Associative_Factor":
+                    return Properties.Resources.invalid_Associative_Factor;
+                case "invalid Associative_negop":
+                    return Properties.Resources.invalid_Associative_negop;
+                case "invalid Associative_BitOp":
+                    return Properties.Resources.invalid_Associative_BitOp;
+                case "invalid Associative_PostFixOp":
+                    return Properties.Resources.invalid_Associative_PostFixOp;
+                case "invalid Associative_Number":
+                    return Properties.Resources.invalid_Associative_Number;
+                case "invalid Associative_Level":
+                    return Properties.Resources.invalid_Associative_Level;
+                case "invalid Associative_NameReference":
+                    return Properties.Resources.invalid_Associative_NameReference;
+                case "invalid Imperative_stmt":
+                    return Properties.Resources.invalid_Imperative_stmt;
+                case "invalid Imperative_functiondecl":
+                    return Properties.Resources.invalid_Imperative_functiondecl;
+                case "invalid Imperative_languageblock":
+                    return Properties.Resources.invalid_Imperative_languageblock;
+                case "invalid Imperative_ifstmt":
+                    return Properties.Resources.invalid_Imperative_ifstmt;
+                case "invalid Imperative_forloop":
+                    return Properties.Resources.invalid_Imperative_forloop;
+                case "invalid Imperative_assignstmt":
+                    return Properties.Resources.invalid_Imperative_assignstmt;
+                case "invalid Imperative_decoratedIdentifier":
+                    return Properties.Resources.invalid_Imperative_decoratedIdentifier;
+                case "invalid Imperative_NameReference":
+                    return Properties.Resources.invalid_Imperative_NameReference;
+                case "invalid Imperative_unaryexpr":
+                    return Properties.Resources.invalid_Imperative_unaryexpr;
+                case "invalid Imperative_unaryop":
+                    return Properties.Resources.invalid_Imperative_unaryexpr;
+                case "invalid Imperative_factor":
+                    return Properties.Resources.invalid_Imperative_factor;
+                case "invalid Imperative_logicalop":
+                    return Properties.Resources.invalid_Imperative_logicalop;
+                case "invalid Imperative_relop":
+                    return Properties.Resources.invalid_Imperative_relop;
+                case "invalid Imperative_addop":
+                    return Properties.Resources.invalid_Imperative_addop;
+                case "invalid Imperative_mulop":
+                    return Properties.Resources.invalid_Imperative_mulop;
+                case "invalid Imperative_bitop":
+                    return Properties.Resources.invalid_Imperative_bitop;
+                case "invalid Imperative_num":
+                    return Properties.Resources.invalid_Imperative_num;
+                case "invalid Imperative_PostFixOp":
+                    return Properties.Resources.invalid_Imperative_PostFixOp;
+                default:
+                    return errorMessage;
+            }
+        }
+
+
+        public void LogSemanticError(string msg, string fileName = null, int line = -1, int col = -1, AssociativeGraph.GraphNode graphNode = null)
+        {
+#if DEBUG
+            if (logErrors)
+            {
+                System.Console.WriteLine("{0}({1},{2}) Error:{3}", fileName, line, col, msg);
+            }
 #endif
 
-if(core.Options.IsDeltaExecution)
-{
-}
+            if (core.Options.IsDeltaExecution)
+            {
+            }
 
-BuildData.ErrorEntryerrorEntry=newBuildData.ErrorEntry
-{
-ID=ErrorType.SemanticError,
-FileName=fileName,
-Message=msg,
-Line=line,
-Column=col
-};
-errors.Add(errorEntry);
+            BuildData.ErrorEntry errorEntry = new BuildData.ErrorEntry
+            {
+                ID = ErrorType.SemanticError,
+                FileName = fileName,
+                Message = msg,
+                Line = line,
+                Column = col
+            };
+            errors.Add(errorEntry);
 
-OutputMessageoutputmessage=newOutputMessage(OutputMessage.MessageType.Error,msg.Trim(),fileName,line,col);
-if(MessageHandler!=null)
-{
-MessageHandler.Write(outputmessage);
-if(!outputmessage.Continue)
-thrownewBuildHaltException(msg);
-}
-thrownewBuildHaltException(msg);
-}
+            OutputMessage outputmessage = new OutputMessage(OutputMessage.MessageType.Error, msg.Trim(), fileName, line, col);
+            if (MessageHandler != null)
+            {
+                MessageHandler.Write(outputmessage);
+                if (!outputmessage.Continue)
+                    throw new BuildHaltException(msg);
+            }
+            throw new BuildHaltException(msg);
+        }
 
-///<summary>
-///Logsthewarningwheretheusageofasymbol(symbolName)cannotbe
-///resolvedbecauseitcollideswithmultiplesymbols(collidingSymbolNames)
-///</summary>
-///<paramname="symbolName"></param>
-///<paramname="collidingSymbolNames"></param>
-publicvoidLogSymbolConflictWarning(stringsymbolName,string[]collidingSymbolNames)
-{
-stringmessage=string.Format(Resources.kMultipleSymbolFoundFromName,symbolName,"");
-message+=String.Join(",",collidingSymbolNames);
-LogWarning(BuildData.WarningID.MultipleSymbolFoundFromName,message);
-}
+        /// <summary>
+        /// Logs the warning where the usage of a symbol (symbolName) cannot be 
+        /// resolved because it collides with multiple symbols(collidingSymbolNames) 
+        /// </summary>
+        /// <param name="symbolName"></param>
+        /// <param name="collidingSymbolNames"></param>
+        public void LogSymbolConflictWarning(string symbolName, string[] collidingSymbolNames)
+        {
+            string message = string.Format(Resources.kMultipleSymbolFoundFromName, symbolName, "");
+            message += String.Join(", ", collidingSymbolNames);
+            LogWarning(BuildData.WarningID.MultipleSymbolFoundFromName, message);
+        }
 
-publicvoidLogDeprecatedMethodWarning(stringoldMethodName,stringnewMethodName)
-{
-varwarningMessage=string.Format(Resources.kMethodDeprecated,
-oldMethodName,newMethodName);
-LogWarning(BuildData.WarningID.FunctionNotFound,warningMessage);
-}
+        public void LogDeprecatedMethodWarning(string oldMethodName, string newMethodName)
+        {
+            var warningMessage = string.Format(Resources.kMethodDeprecated,
+                oldMethodName, newMethodName);
+            LogWarning(BuildData.WarningID.FunctionNotFound, warningMessage);
+        }
 
-///<summary>
-///Logstheunboundvariablewarningandsetstheunboundsymbol
-///</summary>
-///<paramname="unboundSymbol"></param>
-///<paramname="message"></param>
-///<paramname="fileName"></param>
-///<paramname="line"></param>
-///<paramname="col"></param>
-///<paramname="graphNode"></param>
-publicvoidLogUnboundVariableWarning(
-SymbolNodeunboundSymbol,
-stringmessage,
-stringfileName=null,
-intline=-1,
-intcol=-1,
-AssociativeGraph.GraphNodegraphNode=null)
-{
-LogWarning(BuildData.WarningID.IdUnboundIdentifier,message,core.CurrentDSFileName,line,col,graphNode,unboundSymbol);
-}
+        /// <summary>
+        /// Logs the unbound variable warning and sets the unbound symbol
+        /// </summary>
+        /// <param name="unboundSymbol"></param>
+        /// <param name="message"></param>
+        /// <param name="fileName"></param>
+        /// <param name="line"></param>
+        /// <param name="col"></param>
+        /// <param name="graphNode"></param>
+        public void LogUnboundVariableWarning(
+                                SymbolNode unboundSymbol,
+                                string message,
+                                string fileName = null,
+                                int line = -1,
+                                int col = -1,
+                                AssociativeGraph.GraphNode graphNode = null)
+        {
+            LogWarning(BuildData.WarningID.IdUnboundIdentifier, message, core.CurrentDSFileName, line, col, graphNode, unboundSymbol);
+        }
 
-publicvoidLogWarning(BuildData.WarningIDwarningID,
-stringmessage,
-stringfileName=null,
-intline=-1,
-intcol=-1,
-AssociativeGraph.GraphNodegraphNode=null,
-SymbolNodeassociatedSymbol=null)
-{
-varentry=newBuildData.WarningEntry
-{
-ID=warningID,
-Message=message,
-Line=line,
-Column=col,
-GraphNodeGuid=graphNode==null?default(Guid):graphNode.guid,
-AstID=graphNode==null?DSASM.Constants.kInvalidIndex:graphNode.OriginalAstID,
-FileName=fileName,
-UnboundVariableSymbolNode=associatedSymbol
-};
-warnings.Add(entry);
+        public void LogWarning(BuildData.WarningID warningID,
+                               string message,
+                               string fileName = null,
+                               int line = -1,
+                               int col = -1,
+                               AssociativeGraph.GraphNode graphNode = null,
+                               SymbolNode associatedSymbol = null)
+        {
+            var entry = new BuildData.WarningEntry
+            {
+                ID = warningID,
+                Message = message,
+                Line = line,
+                Column = col,
+                GraphNodeGuid = graphNode == null ? default(Guid) : graphNode.guid,
+                AstID = graphNode == null ? DSASM.Constants.kInvalidIndex : graphNode.OriginalAstID,
+                FileName = fileName,
+                UnboundVariableSymbolNode = associatedSymbol
+            };
+            warnings.Add(entry);
 
-if(LogWarnings)
-{
-#ifDEBUG
+            if (LogWarnings)
+            {
+#if DEBUG
 
-System.Console.WriteLine("{0}({1},{2})Warning:{3}",fileName,line,col,message);
+                System.Console.WriteLine("{0}({1},{2}) Warning:{3}", fileName, line, col, message);
 #endif
 
-OutputMessageoutputmessage=newOutputMessage(OutputMessage.MessageType.Warning,message.Trim(),fileName,line,col);
-if(MessageHandler!=null)
-{
-MessageHandler.Write(outputmessage);
-if(!outputmessage.Continue)
-thrownewBuildHaltException(message);
-}
-}
-}
+                OutputMessage outputmessage = new OutputMessage(OutputMessage.MessageType.Warning, message.Trim(), fileName, line, col);
+                if (MessageHandler != null)
+                {
+                    MessageHandler.Write(outputmessage);
+                    if (!outputmessage.Continue)
+                        throw new BuildHaltException(message);
+                }
+            }
+        }
 
-publicvoidReportBuildResult()
-{
-stringbuildResult=string.Format("==========Build:{0}error(s),{1}warning(s)==========\n",errors.Count,warnings.Count);
+        public void ReportBuildResult()
+        {
+            string buildResult = string.Format("========== Build: {0} error(s), {1} warning(s) ==========\n", errors.Count, warnings.Count);
 
-if(displayBuildResult)
-{
-#ifDEBUG
-System.Console.WriteLine(buildResult);
+            if (displayBuildResult)
+            {
+#if DEBUG
+                System.Console.WriteLine(buildResult);
 #endif
 
-if(MessageHandler!=null)
-{
-varoutputMsg=newOutputMessage(buildResult);
-MessageHandler.Write(outputMsg);
+                if (MessageHandler != null)
+                {
+                    var outputMsg = new OutputMessage(buildResult);
+                    MessageHandler.Write(outputMsg);
+                }
+            }
+        }
+    }
 }
-}
-}
-	}
-}
-
+// End of file
